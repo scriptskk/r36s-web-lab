@@ -1,5 +1,8 @@
 # R36S Web Lab
 
+**v0.5 — Premium interface:** clean dark/light appearance selector, organized Console/Laboratório/Comunidade navigation, and a dedicated expandable community project folder with Slot.R36S and PKForge R36S. The navigable 2D R36S now has the front speaker, FN button, staggered ABXY keys and dual analog sticks arranged closer to the physical console. [UI guide](docs/PREMIUM_UI.md). No real ArkOS boot is claimed.
+
+
 **NOVO — Slot.R36S e PKForge R36S:** workspaces visuais com importação local de HTML/CSS/imagens e prévia imediata dentro da tela virtual de 640×480. Os arquivos originais desses projetos precisam ser importados; nenhum frontend foi presumido ou copiado automaticamente. Não inicializa ArkOS nem executa JavaScript importado. [Como usar o laboratório de projetos](docs/PROJECT_LIVE_STUDIOS.md).
 
 
