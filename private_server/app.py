@@ -27,7 +27,7 @@ ALLOWED_EVENTS = {
     "model_opened", "backup_indexed",
     "project_imported", "project_preview_updated", "project_exported"
 }
-ALLOWED_STATIC = {"index.html", "styles.css", "premium.css", "rom-player.html", "rom-player.css", "assets/icon.svg"}
+ALLOWED_STATIC = {"index.html", "styles.css", "premium.css", "monochrome.css", "rom-player.html", "rom-player.css", "assets/icon.svg"}
 LOGIN_HTML = """<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>R36S Web Lab · Acesso privado</title>
 <style>:root{color-scheme:dark;font-family:system-ui,Arial,sans-serif;background:#080e18;color:#e6eefb}*{box-sizing:border-box}body{min-height:100vh;margin:0;display:grid;place-items:center;padding:20px;background:radial-gradient(ellipse at top,#18314b,#080e18 70%)}main{max-width:420px;width:100%;background:#121d2c;border:1px solid #2c435a;border-radius:14px;padding:27px}h1{margin:5px 0 10px}p{color:#9fb2c8;font-size:13px;line-height:1.6}label{display:block;margin:20px 0 7px;font-size:12px}input{width:100%;font:inherit;padding:13px;color:inherit;background:#0d1623;border:1px solid #37516b;border-radius:7px}button{margin-top:18px;font:inherit;width:100%;padding:12px;border-radius:8px;background:#28527f;border:1px solid #457baf;color:white;cursor:pointer}.error{color:#ffb4b4}.small{font-size:11px}button:focus-visible,input:focus-visible{outline:2px solid #9fcaff;outline-offset:2px}</style></head><body><main><p>R36S WEB LAB / PRIVATE WORKSPACE</p><h1>Acesso ao laboratório</h1><p>Somente a conta administradora pode acessar arquivos, ferramentas e registros desta instância.</p>
 {% if error %}<p class="error" role="alert">{{ error }}</p>{% endif %}
