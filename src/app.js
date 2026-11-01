@@ -3,7 +3,7 @@ import {exportTheme, exportSnapshot} from './export.js';
 import {renderFirmwarePanel} from './firmware-ui.js';
 import {renderBackupPanel} from './backup-ui.js';
 import {R36S_REFERENCE} from './hardware.js';
-import {renderProjectPanel,projectPreview,fitProjectFrame} from './project-lab-ui.js';
+import {renderProjectPanel,projectPreview,fitProjectFrame,navigateProject} from './project-lab-ui.js';
 import {PROJECTS} from './project-lab.js';
 import {auditAction,renderAuditPanel} from './audit.js';
 
@@ -13,13 +13,13 @@ const screen = $('screenContent');
 const inspector = $('inspectorContent');
 const tabs = {
   simulator: ['SIMULATOR / LIVE PREVIEW', 'Seu R36S, no navegador.', 'Explore a interface e teste mudanças sem alterar o aparelho.'],
-  slot: ['PROJECTS / SLOT.R36S', 'Slot.R36S — prévia ao vivo.', 'Importe os arquivos reais do projeto para testar visuais dentro da tela de 640 × 480.'],
-  pkforge: ['PROJECTS / PKFORGE R36S', 'PKForge R36S — prévia ao vivo.', 'Importe os arquivos reais e acompanhe alterações de HTML/CSS imediatamente.'],
+  slot: ['COMMUNITY / SLOT36S', 'SLOT36S — catálogo visual.', 'Referência histórica do cartucho e edição de interface na tela do R36S.'],
+  pkforge: ['COMMUNITY / PKFORGE R36S', 'PKForge R36S — workspace.', 'Pasta versionada no GitHub e prévia temporária, aguardando os arquivos originais.'],
   projects: ['COMMUNITY / PROJECT DIRECTORY', 'Projetos da comunidade.', 'Um espaço organizado para os nossos projetos, experiências e futuras implementações.'],
   viewer: ['DEVICE / 3D MODEL', 'O R36S em três dimensões.', 'Inspecione o modelo rotativo criado por Moh1993 no Sketchfab.'],
   firmware: ['FIRMWARE / DISK INSPECTOR', 'Analise imagens do ArkOS.', 'Inspeção local e somente leitura de cabeçalhos e partições.'],
   backup: ['WORKSPACE / BACKUP CATALOG', 'Explore seus arquivos.', 'Indexe uma pasta de backup já extraída, sem upload de jogos ou imagens.'],
-  audit: ['WORKSPACE / ACTIVITY LOG', 'Registro de atividades.', 'Consulte alterações registradas no banco SQLite do servidor privado.'],
+  audit: ['WORKSPACE / ACTIVITY LOG', 'Registro de atividades.', 'Consulte o histórico de ações no banco D1 desta instalação privada.'],
   roms: ['EMULATION / ROM PLAYER', 'Jogue no navegador.', 'Emulação experimental de ROMs com núcleos externos, independente do ArkOS.'],
   theme: ['STUDIO / THEME EDITOR', 'Personalize cada detalhe.', 'Altere cores, tipografia e aparência com prévia imediata.'],
   library: ['LIBRARY / GAME DATA', 'Organize sua biblioteca.', 'Importe listas de jogos para testar os menus com dados reais.'],
@@ -86,7 +86,7 @@ function renderInspector() {
       '<div class="project-folder-grid">'+PROJECTS.map(project =>
         '<button class="project-folder-card" type="button" data-open-project="'+escapeHTML(project.id)+'">'+
         '<span class="project-folder-icon" aria-hidden="true">▱</span>'+
-        '<span class="project-folder-body"><strong>'+escapeHTML(project.label)+'</strong><small>'+escapeHTML(project.description)+'</small></span>'+
+        '<span class="project-folder-body"><strong>'+escapeHTML(project.label)+'</strong><small>'+escapeHTML(project.status)+' · '+escapeHTML(project.description)+'</small></span>'+
         '<span class="project-folder-open" aria-hidden="true">›</span></button>'
       ).join('')+'</div>'+
       '<div class="inspector-card"><div class="card-heading">IMPLEMENTAÇÕES <span class="card-kicker">ROADMAP</span></div>'+
@@ -157,7 +157,7 @@ function confirmSelection() {
   renderScreen();if(state.tab==='simulator')renderInspector();
 }
 function back() {state.view=state.view==='games'?'systems':state.view==='menu'?'systems':'systems';renderScreen();if(state.tab==='simulator')renderInspector();}
-function act(control) {if(state.tab==='slot'||state.tab==='pkforge'){showToast('Controles do R36S ainda não ligados aos arquivos HTML importados.');return;}if(control==='up'||control==='down'||control==='left'||control==='right')navigate(control);else if(control==='confirm')confirmSelection();else if(control==='back')back();else if(control==='menu'){state.view=state.view==='menu'?'systems':'menu';state.menuIndex=0;renderScreen();}}
+function act(control) {if(state.tab==='slot'||state.tab==='pkforge'){if(!navigateProject(state.tab,control))showToast('Este arquivo não possui opções navegáveis. Importe um menu com data-lab-item.');return;}if(control==='up'||control==='down'||control==='left'||control==='right')navigate(control);else if(control==='confirm')confirmSelection();else if(control==='back')back();else if(control==='menu'){state.view=state.view==='menu'?'systems':'menu';state.menuIndex=0;renderScreen();}}
 function setProjectFolder(open) {
   const folder=$('projectFolderToggle'),contents=$('projectFolderContents');
   if(!folder||!contents)return;
