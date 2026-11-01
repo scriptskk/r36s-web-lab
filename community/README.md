@@ -11,4 +11,4 @@ No laboratório, abra **Projetos da Comunidade**, escolha a pasta desejada e cli
 
 Editar o HTML/CSS no site altera um **rascunho local**, não o repositório. Para atualizar a referência versionada, edite os arquivos desta pasta no GitHub, aguarde o deploy Cloudflare e recarregue a versão no laboratório.
 
-As imagens do histórico só devem ser incorporadas como assets binários quando forem recuperadas e verificadas; os projetos publicados aqui não incluem um binário executável de Slot.R36S, PKForge ou ArkOS.
+A referência visual do cartucho de Game Boy Advance foi recuperada da biblioteca do usuário e exportada como WebP otimizado em `slot36s/assets/cartucho-historico.webp`. Os projetos não incluem o binário executável do SLOT36S, PKForge ou ArkOS.
