@@ -1,7 +1,7 @@
 /** R36S Project Lab: browser-local source preview utilities. No firmware execution. */
 export const PROJECTS=Object.freeze([
-  Object.freeze({id:"slot",label:"Slot.R36S",description:"Workspace para importar a interface real do Slot.R36S."}),
-  Object.freeze({id:"pkforge",label:"PKForge R36S",description:"Workspace para importar a interface real do PKForge R36S."})
+  Object.freeze({id:"slot",label:"SLOT36S",status:"Referência histórica reconstruída",description:"Prévia do cartucho e estilo de mídia baseada nas referências recuperadas; ainda não é o código original."}),
+  Object.freeze({id:"pkforge",label:"PKForge R36S",status:"Fontes originais pendentes",description:"Pasta e prévia de referência recuperadas para organização; nenhum código original do PKForge foi localizado."})
 ]);
 export const MAX_FILES=160;
 export const MAX_TOTAL_BYTES=16*1024*1024;
