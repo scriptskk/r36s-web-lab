@@ -1,11 +1,11 @@
 export const SYSTEMS = [
-  { id: 'nes', name: 'Nintendo Entertainment System', short: 'NES', family: '8-BIT', icon: 'N', color: '#eb6472' },
-  { id: 'snes', name: 'Super Nintendo', short: 'SNES', family: '16-BIT', icon: 'S', color: '#a58df8' },
-  { id: 'gb', name: 'Game Boy', short: 'GAME BOY', family: 'HANDHELD', icon: 'G', color: '#8fd0a3' },
-  { id: 'gba', name: 'Game Boy Advance', short: 'GBA', family: 'HANDHELD', icon: 'A', color: '#8eb8ec' },
-  { id: 'megadrive', name: 'Mega Drive', short: 'MEGA DRIVE', family: '16-BIT', icon: 'M', color: '#f3bb79' },
-  { id: 'psx', name: 'PlayStation', short: 'PLAYSTATION', family: '32-BIT', icon: 'P', color: '#d8a2ef' },
-  { id: 'ports', name: 'Ports', short: 'PORTS', family: 'NATIVE', icon: '↗', color: '#e7aa77' }
+  { id: 'nes', name: 'Nintendo Entertainment System', short: 'NES', family: '8-BIT', icon: 'N', color: '#b2b2b2' },
+  { id: 'snes', name: 'Super Nintendo', short: 'SNES', family: '16-BIT', icon: 'S', color: '#c2c2c2' },
+  { id: 'gb', name: 'Game Boy', short: 'GAME BOY', family: 'HANDHELD', icon: 'G', color: '#a6a6a6' },
+  { id: 'gba', name: 'Game Boy Advance', short: 'GBA', family: 'HANDHELD', icon: 'A', color: '#d0d0d0' },
+  { id: 'megadrive', name: 'Mega Drive', short: 'MEGA DRIVE', family: '16-BIT', icon: 'M', color: '#bebebe' },
+  { id: 'psx', name: 'PlayStation', short: 'PLAYSTATION', family: '32-BIT', icon: 'P', color: '#9d9d9d' },
+  { id: 'ports', name: 'Ports', short: 'PORTS', family: 'NATIVE', icon: '↗', color: '#dedede' }
 ];
 
 export const DEMO_GAMES = {
@@ -18,7 +18,7 @@ export const DEMO_GAMES = {
   ports: ['Open Source Demo', 'Input Test']
 };
 
-export const DEFAULT_THEME = Object.freeze({accent: '#82bafa', background: 'midnight', fontScale: 100, scanlines: false});
+export const DEFAULT_THEME = Object.freeze({accent: '#ececec', background: 'midnight', fontScale: 100, scanlines: false});
 const THEMES = new Set(['midnight', 'slate', 'graphite']);
 
 export function safeTheme(candidate) {
