@@ -206,7 +206,7 @@ document.addEventListener('keydown',event=>{
   const target=event.target;
   if(target instanceof HTMLElement && (target.closest('button,a,input,select,textarea') || target.isContentEditable))return;
   const keys={'ArrowUp':'up','ArrowDown':'down','ArrowLeft':'left','ArrowRight':'right','Enter':'confirm','Escape':'back','Backspace':'back','m':'menu','M':'menu'};
-  if(keys[event.key] && state.tab!=='slot' && state.tab!=='pkforge'){event.preventDefault();act(keys[event.key]);}
+  if(keys[event.key]){event.preventDefault();act(keys[event.key]);}
 });
 
 // Standard Gamepad mapping: axes (D-pad/sticks) and buttons A/B/Start.
