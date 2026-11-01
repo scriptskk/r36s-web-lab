@@ -1,5 +1,16 @@
 # Changelog
 
+## [0.5.0] — 2026-11-01
+
+- Premium, responsive page shell and separate light/dark appearance stored locally.
+- Sidebar reorganized into Console, Laboratório and Comunidade.
+- Dedicated expandable Projetos da comunidade folder, with Slot.R36S and PKForge R36S project directory cards.
+- Reworked navigable 2D R36S front, with correct LCD aspect, front grille, FN, Select/Start, ABXY and analog placement.
+- Cloudflare and optional Flask bundles updated to serve premium.css and site-theme.js.
+- Automated tests for appearance modes, project folder and navigation controls.
+- **Limits:** CSS representation is not a calibrated physical mesh; Sketchfab remains external and ArkOS is not booted.
+
+
 ## [0.4.0] — 2026-11-01
 
 - Two isolated visual workspaces named Slot.R36S and PKForge R36S.
