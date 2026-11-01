@@ -1,0 +1,25 @@
+# R36S Web Lab private instance: source stays public; data stays on a Render disk.
+# Render web service is internet-reachable at its login page, but all app content
+# is protected by the Flask server. No ArkOS/ROM files are included.
+services:
+  - type: web
+    name: r36s-web-lab-private
+    runtime: python
+    region: virginia
+    plan: 0.5c-512mb
+    branch: main
+    autoDeployTrigger: checksPass
+    buildCommand: pip install -r requirements-private.txt
+    startCommand: gunicorn --workers 1 --worker-class gthread --threads 4 --timeout 45 --bind 0.0.0.0:$PORT "private_server.app:create_app()"
+    healthCheckPath: /healthz
+    disk:
+      name: r36s-app-data
+      mountPath: /var/data
+      sizeGB: 1
+    envVars:
+      - key: R36S_DATA_DIR
+        value: /var/data
+      - key: R36S_REQUIRE_ADMIN_ON_START
+        value: "1"
+      - key: R36S_INITIAL_PASSWORD
+        sync: false
