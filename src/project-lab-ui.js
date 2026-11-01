@@ -1,4 +1,4 @@
-import {PROJECTS,projectManifest,preferredFile,previewPage,fileCategory} from "./project-lab.js";
+import {PROJECTS,projectManifest,preferredFile,previewPage,fileCategory,classifyProjectManifest} from "./project-lab.js";
 import {auditAction} from "./audit.js";
 import {getCommunitySource,COMMUNITY_SOURCES} from "./community-loader.js";
 import {unzipSourceFiles} from "./zip-import.js";
@@ -235,7 +235,8 @@ export function renderProjectPanel(inspector,heading,showToast,id){
     '<label for="projectZip" class="form-label">Importar projeto compactado (.zip)</label><input class="firmware-file" id="projectZip" type="file" accept=".zip,application/zip,application/x-zip-compressed">'+
     '<label for="projectFolder" class="form-label project-extra-label">Ou importar pasta de frontend (HTML, CSS, imagens)</label><input class="firmware-file" id="projectFolder" type="file" webkitdirectory multiple>'+
     '<label for="projectFiles" class="form-label project-extra-label">Ou selecionar arquivos individualmente</label><input class="firmware-file" id="projectFiles" type="file" multiple accept=".html,.htm,.css,.js,.mjs,.xml,.png,.jpg,.jpeg,.gif,.webp">'+
-    '<div class="fine-print" id="projectImportStatus">'+(project.fileCount?project.fileCount+' arquivos nesta sessão.':'Nenhum arquivo importado. Projetos existentes não foram sincronizados automaticamente.')+'</div>'+
+    '<div class="fine-print" id="projectImportStatus" role="status">'+(project.fileCount?project.fileCount+' arquivos nesta sessão.':'Nenhum arquivo importado. Projetos existentes não foram sincronizados automaticamente.')+'</div>'+
+    '<p class="fine-print project-import-diagnostic" id="projectImportDiagnostic" role="alert"></p>'+
     '<label for="projectEntrySelect" class="form-label project-extra-label">Tela HTML inicial</label><select id="projectEntrySelect" class="field-select" aria-label="Escolher arquivo HTML para visualizar"><option value="">Nenhum arquivo local selecionado</option></select>'+
     '<details class="project-files-detail"><summary>Explorar arquivos importados</summary><div class="project-file-list" id="projectFileList" role="list"></div></details>'+
     '<p class="fine-print">Os arquivos ficam no seu navegador. ZIP até 32 MB, conteúdo até 16 MB. HTML/CSS e imagens criam uma prévia; JavaScript e programas ARM são identificados, mas não executados nesta modalidade segura. Imagens ArkOS .img não são inicializadas.</p></div>'+
@@ -250,6 +251,7 @@ export function renderProjectPanel(inspector,heading,showToast,id){
   const htmlEditor=inspector.querySelector("#projectHtmlEditor");
   const cssEditor=inspector.querySelector("#projectCssEditor");
   const status=inspector.querySelector("#projectLiveStatus");
+  const diagnostic=inspector.querySelector("#projectImportDiagnostic");
   const runtimeButton=inspector.querySelector("#projectRuntimeToggle");
   htmlEditor.value=project.html;cssEditor.value=project.css;
   const entrySelect=inspector.querySelector("#projectEntrySelect");
@@ -347,10 +349,17 @@ export function renderProjectPanel(inspector,heading,showToast,id){
     try{
       const result=await loadFiles(id,event.target.files);
       htmlEditor.value=project.html;cssEditor.value=project.css;showFileBrowser();
-      indicator.textContent=result.manifest.count+" arquivo(s), "+result.manifest.images+" imagem(ns), "+result.manifest.css+" CSS, "+result.manifest.html+" HTML e "+result.manifest.javascript+" JavaScript (não executado). "+
-      (result.htmlFound?"Prévia disponível.":"Nenhum HTML encontrado: editor/visualização continuam como rascunho.");
-      showToast("Arquivos analisados localmente. Nenhum backup ou ROM foi enviado.");
-    }catch(error){indicator.textContent=error.message||"Falha ao ler pasta.";}
+      const compatibility=classifyProjectManifest(result.manifest);
+      indicator.textContent=result.manifest.count+" arquivos: "+result.manifest.html+" HTML, "+
+        result.manifest.css+" CSS, "+result.manifest.javascript+" JS, "+
+        result.manifest.source+" fontes/configuração, "+result.manifest.images+" imagens.";
+      diagnostic.textContent=compatibility.explanation;
+      status.textContent=compatibility.preview?"Prévia carregada. JavaScript web requer ativação explícita.":"Projeto inventariado, mas ainda não executável como interface web.";
+      showToast(compatibility.preview?"Frontend importado e pronto para visualização.":"Arquivos importados; veja o diagnóstico de compatibilidade.");
+    }catch(error){
+      indicator.textContent="Não foi possível importar a pasta.";
+      diagnostic.textContent=error.message||"Falha ao ler os arquivos.";
+    }
   }
   inspector.querySelector("#projectFolder").addEventListener("change",imported);
   inspector.querySelector("#projectZip").addEventListener("change",async event=>{
@@ -361,12 +370,18 @@ export function renderProjectPanel(inspector,heading,showToast,id){
       const files=await unzipSourceFiles(zip);
       const result=await loadFiles(id,files);
       htmlEditor.value=project.html;cssEditor.value=project.css;showFileBrowser();
-      indicator.textContent="ZIP importado: "+result.manifest.count+" arquivos compatíveis, "+
-        result.manifest.html+" HTML, "+result.manifest.css+" CSS, "+result.manifest.javascript+
-        " JS identificados (sem execução), "+result.manifest.images+" imagens. "+
-        (result.htmlFound?"Prévia renderizada.":"Nenhum arquivo HTML encontrado.");
-      showToast("ZIP aberto localmente. Arquivos não foram enviados à Cloudflare.");
-    }catch(error){indicator.textContent=error.message||"Falha na leitura do ZIP.";}
+      const compatibility=classifyProjectManifest(result.manifest);
+      indicator.textContent="ZIP aberto: "+result.manifest.count+" arquivos; "+
+        result.manifest.html+" HTML, "+result.manifest.css+" CSS, "+
+        result.manifest.javascript+" JS, "+result.manifest.source+" fontes/configuração, "+
+        result.manifest.images+" imagens.";
+      diagnostic.textContent=compatibility.explanation;
+      status.textContent=compatibility.preview?"Prévia pronta; o JavaScript está desligado por padrão.":"ZIP importado, mas sem frontend HTML executável nesta versão.";
+      showToast(compatibility.preview?"ZIP importado e prévia exibida.":"ZIP analisado: confira o diagnóstico no painel.");
+    }catch(error){
+      indicator.textContent="Não foi possível abrir este ZIP.";
+      diagnostic.textContent=error.message||"Falha na leitura do arquivo compactado.";
+    }
     finally{event.target.value="";}
   });
   inspector.querySelector("#projectFiles").addEventListener("change",imported);
