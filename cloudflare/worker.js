@@ -111,14 +111,24 @@ export default {
       response.headers.set("x-robots-tag","noindex, nofollow, noarchive");
       response.headers.set("referrer-policy","no-referrer");
       response.headers.set("x-frame-options","SAMEORIGIN");
-      response.headers.set("content-security-policy",
-        "default-src 'self'; base-uri 'none'; object-src 'none'; form-action 'self'; frame-ancestors 'self'; "+
-        "script-src 'self' https://cdn.emulatorjs.org 'wasm-unsafe-eval'; "+
-        "connect-src 'self' blob: https://cdn.emulatorjs.org; "+
-        "frame-src 'self' https://sketchfab.com; "+
-        "img-src 'self' data: blob: https:; media-src 'self' blob:; "+
-        "style-src 'self' 'unsafe-inline' https://cdn.emulatorjs.org; "+
-        "font-src 'self' data: https://cdn.emulatorjs.org; worker-src 'self' blob:");
+      // JS execution is only permitted inside a dedicated opaque-origin iframe,
+      // with CSP isolation. Do not weaken the main site CSP to run imported code.
+      if(pathname==="/project-runtime.html"){
+        response.headers.set("content-security-policy",
+          "default-src 'none'; base-uri 'none'; object-src 'none'; form-action 'none'; "+
+          "frame-ancestors 'self'; connect-src 'none'; frame-src 'none'; "+
+          "script-src 'unsafe-inline'; style-src 'unsafe-inline'; "+
+          "img-src data: blob:; font-src data:; media-src 'none'");
+      }else{
+        response.headers.set("content-security-policy",
+          "default-src 'self'; base-uri 'none'; object-src 'none'; form-action 'self'; frame-ancestors 'self'; "+
+          "script-src 'self' https://cdn.emulatorjs.org 'wasm-unsafe-eval'; "+
+          "connect-src 'self' blob: https://cdn.emulatorjs.org; "+
+          "frame-src 'self' https://sketchfab.com; "+
+          "img-src 'self' data: blob: https:; media-src 'self' blob:; "+
+          "style-src 'self' 'unsafe-inline' https://cdn.emulatorjs.org; "+
+          "font-src 'self' data: https://cdn.emulatorjs.org; worker-src 'self' blob:");
+      }
       return response;
     }catch(error){
       // Do not leak user info, SQL, or stack traces.
