@@ -129,6 +129,7 @@ function localScripts(p){
   }
   return found;
 }
+export function isProjectRuntimeEnabled(id){return !!projects[id]?.runJS;}
 export function stopProjectRuntime(){
   for(const project of Object.values(projects))project.runJS=false;
   const frame=document.getElementById("projectPreviewFrame");
