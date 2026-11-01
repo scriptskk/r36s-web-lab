@@ -4,7 +4,7 @@ const root=process.cwd();
 const output=path.join(root,"dist");
 await rm(output,{recursive:true,force:true});
 await mkdir(output,{recursive:true});
-for(const filename of ["index.html","styles.css","rom-player.html","rom-player.css"]){
+for(const filename of ["index.html","styles.css","premium.css","rom-player.html","rom-player.css"]){
   await copyFile(path.join(root,filename),path.join(output,filename));
 }
 await cp(path.join(root,"assets"),path.join(output,"assets"),{recursive:true});
@@ -16,7 +16,7 @@ for(const dir of ["","src","assets"]){
   if((await stat(full)).isFile())files.push(path.posix.join(dir,name));
  }
 }
-const expected=["index.html","src/app.js","src/audit.js","src/firmware.js","src/backup.js"];
+const expected=["index.html","styles.css","premium.css","src/app.js","src/site-theme.js","src/audit.js","src/firmware.js","src/backup.js"];
 for(const filename of expected)if(!files.includes(filename))throw Error("Missing asset: "+filename);
 if(files.some(f=>f.includes(".env")||f.endsWith(".db")||f.endsWith(".sqlite3")||f.startsWith("private_server/")))throw Error("Unexpected private asset");
 console.log("Cloudflare asset bundle created:",files.length,"files.");
