@@ -228,3 +228,14 @@ html[data-appearance="light"] .console-reference-image{filter:drop-shadow(0 13px
 @media(prefers-reduced-motion:reduce){
  .console-shell .controls button,.console-reference-image{transition:none}
 }
+
+/* Accessible rear shoulder controls shown separately because the photo is frontal. */
+.console-wrap{flex-direction:column;gap:9px}
+.shoulder-strip{display:flex;align-items:center;justify-content:center;gap:15px;width:min(345px,100%);margin:0 auto 3px;z-index:7}
+.shoulder-side{display:flex;gap:7px}
+.shoulder-side button{min-width:38px;min-height:32px;padding:6px 10px;background:var(--surface);border:1px solid var(--border);
+ color:var(--text);border-radius:4px;font:700 11px/1.4 ui-monospace,SFMono-Regular,Consolas,monospace;cursor:pointer}
+.shoulder-side button:hover,.shoulder-side button:focus-visible{background:var(--surface-strong);border-color:var(--text)}
+.shoulder-side button:active{transform:translateY(1px);background:var(--surface-hover)}
+.shoulder-caption{font:700 8px/1.4 ui-monospace,monospace;letter-spacing:.13em;text-align:center;color:var(--muted)}
+@media(max-width:680px){.shoulder-strip{gap:8px}.shoulder-side{gap:4px}.shoulder-side button{min-width:34px;padding:5px 7px}.shoulder-caption{font-size:7px}}
