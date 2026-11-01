@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.4.0] — 2026-11-01
+
+- Two isolated visual workspaces named Slot.R36S and PKForge R36S.
+- Import local HTML, CSS and image assets with size/path validation; render a sandboxed, script-disabled 640×480 live preview.
+- Debounced HTML/CSS editing and browser-local export of static HTML snapshot.
+- D1 audit event types for source import, preview change and preview export.
+- No integrated Slot/PKForge source code, JavaScript execution, ArkOS boot or accurate RK3326 emulation.
+
+
 ## Cloudflare Free deployment preparation — 2026-11-01
 
 - Added a Cloudflare Worker with signed Access JWT verification for every asset and API request, administrator email allowlist and CSRF-protected events.
