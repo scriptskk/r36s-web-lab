@@ -1,14 +1,30 @@
-# Projetos da Comunidade — R36S Web Lab
+# Projetos da Comunidade
 
-Este catálogo guarda referências, prévias e implementações que podem ser abertas no laboratório privado. O código do repositório GitHub é **público**; não armazene backups pessoais, ROMs, BIOS, tokens ou senhas aqui.
+Workspaces de interface e experimentação mantidos no **R36S Web Lab**.
 
-| Projeto | Pasta | Proveniência | Prévia |
-| --- | --- | --- | --- |
-| SLOT36S | [slot36s](slot36s/) | Reconstrução visual a partir da referência histórica de cartucho Game Boy Advance. Código original não encontrado. | [preview.html](slot36s/preview.html) + [style.css](slot36s/style.css) |
-| PKForge R36S | [pkforge-r36s](pkforge-r36s/) | Nome e objetivo recuperados, sem código original verificável. | [preview.html](pkforge-r36s/preview.html) + [style.css](pkforge-r36s/style.css) |
+| Projeto | Estado | Abrir |
+| --- | --- | --- |
+| **SLOT36S** | Catálogo de cartuchos com prévia web navegável | [Documentação](slot36s/README.md) |
+| **PokeForge R36S** | Adaptador para pacote nativo Go/ARM v1.6 importado por ZIP | [Documentação](pkforge-r36s/README.md) |
 
-No laboratório, abra **Projetos da Comunidade**, escolha a pasta desejada e clique em **Carregar / atualizar prévia do GitHub**. O HTML/CSS é exibido dentro da tela 640 × 480 do R36S em sandbox sem scripts; setas e botões A/B podem navegar itens identificados por `data-lab-item`.
+## Fluxo de desenvolvimento
 
-Editar o HTML/CSS no site altera um **rascunho local**, não o repositório. Para atualizar a referência versionada, edite os arquivos desta pasta no GitHub, aguarde o deploy Cloudflare e recarregue a versão no laboratório.
+1. Abra o laboratório privado e selecione **Projetos da Comunidade**.
+2. Escolha o workspace desejado.
+3. Para o SLOT36S, carregue a prévia do repositório ou importe sua própria interface HTML/CSS.
+4. Para o PokeForge v1.6, selecione o ZIP original no importador. O aplicativo será reconhecido e a interface de referência poderá ser navegada.
+5. Teste a disposição na tela 640 × 480 e os comandos do console. Exporte a prévia HTML quando necessário.
 
-A referência visual do cartucho de Game Boy Advance foi recuperada da biblioteca do usuário e exportada como WebP otimizado em `slot36s/assets/cartucho-historico.webp`. Os projetos não incluem o binário executável do SLOT36S, PKForge ou ArkOS.
+Alterações locais feitas no navegador não criam commits automaticamente. As versões disponíveis no GitHub são atualizadas por commits normais e republicadas pela Cloudflare.
+
+## Organização
+
+- [Catálogo de projetos](catalog.json): identificadores, arquivos de prévia e tipos de importação.
+- [SLOT36S](slot36s/): layout e recursos visuais do catálogo de cartuchos.
+- [PokeForge R36S](pkforge-r36s/): prévia web padrão e documentação do adaptador nativo.
+
+## Escopo
+
+O código deste repositório é público; o laboratório implantado utiliza autenticação Cloudflare Access. **Não publique** ROMs, BIOS, imagens ArkOS, dados de save, segredos ou os arquivos privados originais dos projetos.
+
+As prévias servem para testes de interface. Elas não equivalem à execução integral do ArkOS nem substituem a validação em hardware real.
