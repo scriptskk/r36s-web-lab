@@ -1,9 +1,30 @@
-# PKForge R36S — workspace versionado
+# PokeForge R36S
 
-A intenção de integrar o **PKForge R36S** ao laboratório foi recuperada do histórico, mas os fontes, capturas finais e especificação técnica original não estão disponíveis nos repositórios e arquivos acessíveis nesta etapa.
+Workspace de desenvolvimento e validação da interface do **PokeForge R36S**, aplicativo nativo para Linux/ArkOS.
 
-- `preview.html` e `style.css` são um **placeholder identificado** para testar a abertura no painel R36S.
-- O projeto **não** é um editor Pokémon funcional nem executa código ArkOS.
-- Os arquivos reais, quando disponíveis, devem ser adicionados nesta pasta sem incluir ROMs, dados privados ou BIOS.
+## Integração disponível
 
-Depois do commit, abra **Projetos da Comunidade → PKForge R36S → Carregar / atualizar prévia do GitHub**. A versão visual aparecerá na tela do console.
+O R36S Web Lab reconhece a distribuição **PokeForge R36S v1.6** em formato ZIP. O pacote utiliza código Go, executáveis ARM e acesso ao framebuffer do Linux.
+
+Ao importar o ZIP na área **Projetos da Comunidade → PKForge R36S**, o laboratório apresenta um adaptador navegável em 640 × 480 com:
+
+- Seleção de perfil e navegação pelas telas HOME, BOXES, BANK, PARTY, TRAINER, EDITOR, TOOLS e POKEDEX.
+- Direcional e botões A/B para navegar; L1/R1 e L2/R2 para alternar itens, boxes, gerações e telas.
+- Leitura local do catálogo Pokédex incluído no arquivo selecionado.
+
+O adaptador reproduz o fluxo visual da aplicação. **Ele não executa os binários ARM, não altera saves e não inicializa o ArkOS.**
+
+## Arquivos do repositório
+
+| Arquivo | Função |
+| --- | --- |
+| [preview.html](preview.html) | Tela web de referência usada quando nenhum ZIP local está carregado |
+| [style.css](style.css) | Estilos da tela de referência |
+| [Adaptador nativo](../../src/pokeforge-native-preview.js) | Componentes e navegação da prévia do aplicativo Go/ARM |
+| [Guia de importação](../../docs/POKEFORGE_NATIVE_ZIP.md) | Procedimento de testes com o pacote v1.6 |
+
+## Desenvolvimento
+
+O pacote original permanece no dispositivo do usuário e **não é publicado no GitHub**. Para testá-lo, importe-o pelo navegador. Alterações feitas no editor web criam rascunhos locais; somente alterações enviadas ao repositório por commit passam a integrar a versão publicada.
+
+A execução completa do aplicativo exige Linux ARM com framebuffer e dispositivos de entrada compatíveis, ou testes no próprio R36S.
