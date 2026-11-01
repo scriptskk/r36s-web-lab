@@ -13,7 +13,7 @@
   <body>
     <header class="topbar">
       <div class="brand"><span class="brand-mark">R<span>36</span>S</span><span class="brand-separator"></span><strong>WEB LAB</strong></div>
-      <span class="release">OPEN SOURCE <span class="release-dot"></span> 0.1.0</span>
+      <span class="release">OPEN SOURCE <span class="release-dot"></span> 0.2.0</span>
       <div class="top-actions"><span class="top-note">AMBIENTE LOCAL · SEM BACKEND</span><button id="backupButton" class="top-button" type="button">Exportar projeto <span aria-hidden="true">↗</span></button></div>
     </header>
 
@@ -22,6 +22,9 @@
         <div class="section-label">WORKSPACE</div>
         <nav class="nav-items" aria-label="Seções">
           <button class="nav-item selected" type="button" data-tab="simulator"><span class="nav-symbol">▣</span> Simulador <span class="nav-arrow">›</span></button>
+          <button class="nav-item" type="button" data-tab="viewer"><span class="nav-symbol">◇</span> Modelo 3D <span class="nav-arrow">›</span></button>
+          <button class="nav-item" type="button" data-tab="firmware"><span class="nav-symbol">▦</span> Firmware Lab <span class="nav-arrow">›</span></button>
+          <button class="nav-item" type="button" data-tab="roms"><span class="nav-symbol">▶</span> ROM Player <span class="nav-arrow">›</span></button>
           <button class="nav-item" type="button" data-tab="theme"><span class="nav-symbol">◈</span> Theme Studio <span class="nav-arrow">›</span></button>
           <button class="nav-item" type="button" data-tab="library"><span class="nav-symbol">▤</span> Biblioteca <span class="nav-arrow">›</span></button>
           <button class="nav-item" type="button" data-tab="hardware"><span class="nav-symbol">⌘</span> Hardware <span class="nav-arrow">›</span></button>
@@ -43,7 +46,7 @@
         <div class="workspace-grid">
           <section class="device-stage" aria-label="Prévia interativa do R36S">
             <div class="stage-topline"><span>DEVICE PREVIEW</span><span class="stage-mode">R36S · SIMULATION MODE</span></div>
-            <div class="console-wrap">
+            <div class="console-wrap" id="consoleWrap">
               <div class="console-shell" id="consoleShell">
                 <div class="console-upper">
                   <div class="bezel-label">R36S</div>
@@ -73,6 +76,11 @@
                 </div>
               </div>
             </div>
+            <div class="sketchfab-stage" id="sketchfabStage" hidden>
+              <iframe title="R36S console — modelo 3D por Moh1993" loading="lazy" referrerpolicy="strict-origin-when-cross-origin" allow="autoplay; fullscreen; xr-spatial-tracking" allowfullscreen src="https://sketchfab.com/models/c6ecbfabf473479a8ffd73149090c5bb/embed?autostart=0&ui_theme=dark"></iframe>
+              <div class="model-credit"><span>Modelo 3D por <a href="https://sketchfab.com/Moh1993" rel="noopener noreferrer" target="_blank">Moh1993</a> no <a href="https://sketchfab.com/3d-models/r36s-console-c6ecbfabf473479a8ffd73149090c5bb" target="_blank" rel="noopener noreferrer">Sketchfab</a>.</span><span>Visualizador externo · Não executa o firmware</span></div>
+            </div>
+            <div class="rom-stage" id="romStage" hidden><iframe title="ROM Player — emulador no navegador" id="romFrame" src="about:blank" allow="autoplay; gamepad; fullscreen" allowfullscreen></iframe></div>
             <div class="stage-footer"><span><span class="keyboard-symbol">⌨</span> SETAS · NAVEGAR &nbsp; ENTER · SELECIONAR &nbsp; ESC · VOLTAR</span><span id="gamepadStatus">GAMEPAD: AGUARDANDO</span></div>
           </section>
 
@@ -81,7 +89,7 @@
             <div id="inspectorContent"></div>
           </aside>
         </div>
-        <footer class="workspace-footer"><span>R36S WEB LAB — PROTÓTIPO DE INTERFACE</span><span>Não executa firmware, ROMs ou emuladores reais.</span></footer>
+        <footer class="workspace-footer"><span>R36S WEB LAB — LABORATÓRIO EXPERIMENTAL</span><span>O ArkOS não é inicializado. ROM Player utiliza emuladores externos sob demanda.</span></footer>
       </main>
     </div>
     <div id="toast" class="toast" role="status" aria-live="polite"></div>
