@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="pt-BR"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=640,initial-scale=1">
+<title>R36S Project Sandbox</title>
+<style>
+  html,body{width:640px;height:480px;overflow:hidden;margin:0;background:#080808;color:#f0f0f0}
+  #app{width:640px;min-height:480px}
+  #diagnostic{position:absolute;bottom:0;right:0;left:0;padding:8px 12px;font:12px/1.4 monospace;background:#101010;color:#eee;display:none;z-index:99}
+</style>
+</head><body>
+<div id="app" aria-label="Interface importada"></div><div id="diagnostic" role="alert"></div>
+<script>
+(function(){
+  "use strict";
+  const app=document.getElementById("app");
+  const diagnostic=document.getElementById("diagnostic");
+  function error(message){diagnostic.textContent="PROJECT RUNTIME: "+String(message).slice(0,180);diagnostic.style.display="block";}
+  window.addEventListener("error",event=>{error(event.message||"Falha de JavaScript");});
+  window.addEventListener("unhandledrejection",event=>{error(event.reason?.message||"Erro de execução");});
+  function allowedSource(event){
+    try{return event.source===window.parent && event.origin===new URL(location.href).origin;}
+    catch{return false;}
+  }
+  window.addEventListener("message",event=>{
+    if(!allowedSource(event))return;
+    const payload=event.data;
+    if(!payload||payload.type!=="r36s-web-lab-runtime-v1")return;
+    if(typeof payload.html!=="string"||typeof payload.css!=="string"||
+       !Array.isArray(payload.scripts)||payload.html.length>2_000_000||payload.css.length>2_000_000||
+       payload.scripts.length>40){error("Arquivos excedem os limites do modo web.");return;}
+    diagnostic.style.display="none";
+    app.replaceChildren();
+    const oldStyle=document.getElementById("project-style");
+    if(oldStyle)oldStyle.remove();
+    const style=document.createElement("style");style.id="project-style";style.textContent=payload.css;
+    document.head.append(style);
+    // HTML was sanitized in the parent; the iframe has an opaque sandbox origin.
+    app.innerHTML=payload.html;
+    for(const item of payload.scripts){
+      if(!item||typeof item.code!=="string"||item.code.length>1_000_000)continue;
+      if(item.kind!=="classic"&&item.kind!=="module")continue;
+      const el=document.createElement("script");
+      if(item.kind==="module")el.type="module";
+      // Inline only; never load user-provided external script URLs.
+      el.textContent=item.code.replace(/<\/script/gi,"<\\/script");
+      app.append(el);
+    }
+  });
+})();
+</script>
+</body></html>
