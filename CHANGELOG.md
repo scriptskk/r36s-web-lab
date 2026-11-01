@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.9.1] — 2026-11-01
+
+### Documentação e projetos da comunidade
+
+- Reorganização do README principal, com instruções de instalação, recursos e compatibilidade atuais.
+- Documentação independente para SLOT36S e PokeForge R36S, incluindo arquivos, testes e limitações de execução.
+- Catálogo de workspaces atualizado para distinguir a prévia web de cartuchos do adaptador de ZIP Go/ARM.
+- Tela inicial do PokeForge ajustada para orientar a importação local da distribuição v1.6.
+- Guia Cloudflare revisado para instalações existentes e forks; testes de integração atualizados.
+- Nenhum binário ARM, arquivo de save, ROM ou pacote privado foi adicionado ao repositório.
+
+
 ## [0.9.0] — 2026-11-01
 
 - Implemented a Go/ARM ZIP detector for the real PokeForge R36S v1.6 distribution using its main.go and ArkOS launcher filenames.
