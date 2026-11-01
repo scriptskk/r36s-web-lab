@@ -1,8 +1,9 @@
 import {PROJECTS,projectManifest,preferredFile,previewPage,fileCategory} from "./project-lab.js";
 import {auditAction} from "./audit.js";
+import {getCommunitySource,COMMUNITY_SOURCES} from "./community-loader.js";
 
 const STORAGE="r36s-web-lab:project-drafts:v1";
-const projects=Object.fromEntries(PROJECTS.map(p=>[p.id,{html:"",css:"",assetMap:new Map(),fileCount:0,xmlCount:0}]));
+const projects=Object.fromEntries(PROJECTS.map(p=>[p.id,{html:"",css:"",assetMap:new Map(),fileCount:0,xmlCount:0,repoLoaded:false,selectedIndex:0,detail:false,edited:false}]));
 function readDrafts(){
   try{
     const drafts=JSON.parse(localStorage.getItem(STORAGE)||"{}");
@@ -76,12 +77,43 @@ function placeholder(id){
     '<h1 style="margin:8px 0 3px;color:#f2f7ff">'+escapeText(label)+'</h1>'+
     '<p style="font-size:15px">Nenhum frontend importado.</p><p style="font-size:13px">Selecione uma pasta HTML/CSS real para visualizar o projeto.</p></main>';
 }
+function navigablePreview(html,p){
+  const doc=new DOMParser().parseFromString(html,"text/html");
+  const entries=Array.from(doc.querySelectorAll("[data-lab-item]"));
+  if(!entries.length){p.detail=false;p.selectedIndex=0;return doc.body.innerHTML;}
+  p.selectedIndex=Math.min(p.selectedIndex,entries.length-1);
+  if(p.detail){
+    const item=entries[p.selectedIndex];
+    const title=escapeText(item.getAttribute("data-preview-title")||item.textContent||"Detalhes");
+    const detail=escapeText(item.getAttribute("data-preview-description")||"Item de prévia: descrição não disponível.");
+    return '<main style="height:480px;background:#090909;color:#f0f0f0;display:flex;flex-direction:column;padding:27px;font:18px/1.6 ui-monospace,monospace">'+
+      '<div style="font-size:12px;letter-spacing:2px;color:#aaa;border-bottom:1px solid #555;padding-bottom:12px">PROJECT LAB / DETAIL</div>'+
+      '<h1 style="font-size:26px;margin:38px 0 15px">'+title+'</h1><p style="font-size:16px;color:#bbb;max-width:570px">'+detail+'</p>'+
+      '<div style="margin-top:auto;font-size:12px;letter-spacing:2px;border-top:1px solid #555;padding-top:13px">B / ESC = VOLTAR</div></main>';
+  }
+  entries.forEach((entry,i)=>entry.setAttribute("data-active",i===p.selectedIndex?"true":"false"));
+  return doc.body.innerHTML;
+}
+export function navigateProject(id,control){
+  const p=projects[id];if(!p||!p.html)return false;
+  const doc=new DOMParser().parseFromString(p.html,"text/html");
+  const count=doc.querySelectorAll("[data-lab-item]").length;
+  if(!count)return false;
+  if(control==="up"||control==="left"){p.detail=false;p.selectedIndex=(p.selectedIndex+count-1)%count;}
+  else if(control==="down"||control==="right"){p.detail=false;p.selectedIndex=(p.selectedIndex+1)%count;}
+  else if(control==="confirm"){p.detail=true;}
+  else if(control==="back"){p.detail=false;}
+  else if(control==="menu"){p.detail=false;p.selectedIndex=0;}
+  else return false;
+  projectPreview(id);
+  return true;
+}
 export function projectPreview(id){
   const p=projects[id];if(!p)return;
   const frame=document.getElementById("projectPreviewFrame");
   if(!frame)return;
   const entry=p.entry||"index.html";
-  const html=p.html.trim()?sandboxHTML(p.html,p.assetMap,entry):placeholder(id);
+  const html=p.html.trim()?navigablePreview(sandboxHTML(p.html,p.assetMap,entry),p):placeholder(id);
   frame.srcdoc=previewPage(html,sandboxCSS(p.css,p.assetMap,p.cssEntry||entry));
 }
 export function fitProjectFrame(){
@@ -126,6 +158,7 @@ async function loadFiles(id,files){
   }
   const project=projects[id];
   project.assetMap=data;project.fileCount=manifest.count;project.xmlCount=manifest.files.filter(f=>f.category==="xml").length;
+  project.repoLoaded=false;project.detail=false;project.selectedIndex=0;project.edited=true;
   project.html=html;project.css=cssParts.join("\n");
   project.entry=chosen?.path||"index.html";
   project.cssEntry=cssFiles[0]?.path||project.entry;
@@ -138,7 +171,15 @@ export function renderProjectPanel(inspector,heading,showToast,id){
   if(!projects[id])return;
   const project=projects[id];
   const label=PROJECTS.find(p=>p.id===id).label;
-  inspector.innerHTML=heading(label+" — Live Studio","Importe o HTML/CSS e imagens do projeto e veja alterações ao vivo na tela 640 × 480. Não inicializa ArkOS nem executa scripts.")+
+  const source=COMMUNITY_SOURCES[id];
+  const projectInfo=PROJECTS.find(item=>item.id===id);
+  inspector.innerHTML=heading(label+" — Live Studio","Prévia navegável com fontes versionadas no GitHub, edição local e tela 640 × 480. Não inicializa ArkOS.")+
+    '<div class="inspector-card"><div class="card-heading">REPOSITÓRIO / VERSÃO <span class="card-kicker">GITHUB · MAIN</span></div>'+
+    '<div class="metric-line"><span>Situação</span><strong>'+escapeText(projectInfo.status)+'</strong></div>'+
+    '<p class="fine-print">A pasta GitHub contém arquivos de referência, não uma cópia comprovada do projeto executável original. Mudanças feitas no GitHub entram no site após a publicação automática.</p>'+
+    '<button type="button" class="action-button" id="projectLoadRepo">Carregar / atualizar prévia do GitHub</button>'+
+    '<a class="action-button secondary" style="display:block;text-align:center" href="'+source.github+'" target="_blank" rel="noopener noreferrer">Abrir pasta do projeto no GitHub ↗</a>'+
+    '<p class="fine-print" id="projectRepoStatus" role="status">Selecione atualizar ou edite o rascunho neste navegador.</p></div>'+
     '<div class="inspector-card"><div class="card-heading">ARQUIVOS DO PROJETO <span class="card-kicker">LOCAL · READ ONLY</span></div>'+
     '<label for="projectFolder" class="form-label">Importar pasta de frontend (HTML, CSS, imagens)</label><input class="firmware-file" id="projectFolder" type="file" webkitdirectory multiple>'+
     '<label for="projectFiles" class="form-label project-extra-label">Ou selecionar arquivos individualmente</label><input class="firmware-file" id="projectFiles" type="file" multiple accept=".html,.htm,.css,.xml,.png,.jpg,.jpeg,.gif,.webp">'+
@@ -154,9 +195,31 @@ export function renderProjectPanel(inspector,heading,showToast,id){
   const cssEditor=inspector.querySelector("#projectCssEditor");
   const status=inspector.querySelector("#projectLiveStatus");
   htmlEditor.value=project.html;cssEditor.value=project.css;
+  const repoStatus=inspector.querySelector("#projectRepoStatus");
+  let fetching=false;
+  async function reloadFromRepo(force=false){
+    if(fetching || (!force && (project.html||project.css||project.repoLoaded)))return;
+    fetching=true;repoStatus.textContent="Buscando prévia versionada no GitHub...";
+    try{
+      const data=await getCommunitySource(id);
+      if(!inspector.isConnected)return;
+      if(!force && (project.edited||project.html||project.css))return;
+      project.html=data.html;project.css=data.css;project.assetMap=new Map();
+      project.entry=data.html.slice(2);project.cssEntry=data.css.slice(2);
+      project.repoLoaded=true;project.detail=false;project.selectedIndex=0;project.edited=false;
+      htmlEditor.value=data.html;cssEditor.value=data.css;
+      repoStatus.textContent="Prévia versionada carregada. Use ↑↓ e A/B no console para navegar; edições locais não atualizam o GitHub automaticamente.";
+      projectPreview(id);
+      auditAction("project_source_loaded",{section:id,count:2});
+    }catch(error){repoStatus.textContent="Falha ao carregar referência: "+error.message;}
+    finally{fetching=false;}
+  }
+  inspector.querySelector("#projectLoadRepo").addEventListener("click",()=>reloadFromRepo(true));
+  // Local drafts are never silently overwritten by the checked-in template.
+  reloadFromRepo(false);
   let updateTimer;
   function changed(){
-    project.html=htmlEditor.value;project.css=cssEditor.value;
+    project.html=htmlEditor.value;project.css=cssEditor.value;project.edited=true;project.detail=false;
     clearTimeout(updateTimer);
     updateTimer=setTimeout(()=>{
       projectPreview(id);saveDrafts();status.textContent="Prévia atualizada na tela · alterações não modificam o seu backup.";
