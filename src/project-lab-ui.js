@@ -206,6 +206,19 @@ export function renderProjectPanel(inspector,heading,showToast,id){
       if(!force && (project.edited||project.html||project.css))return;
       project.html=data.html;project.css=data.css;project.assetMap=new Map();
       project.entry=data.htmlPath.slice(2);project.cssEntry=data.cssPath.slice(2);
+      if(id==="slot"){
+        // Only the same-origin, checked-in historical reference image is loaded;
+        // the sandbox receives data bytes, never external executable code.
+        try{
+          const img=await fetch("./community/slot36s/assets/cartucho-historico.webp",{credentials:"same-origin",cache:"no-store"});
+          if(img.ok){
+            const blob=await img.blob();
+            if(blob.size>0 && blob.size<1_000_000 && blob.type==="image/webp"){
+              project.assetMap.set("community/slot36s/assets/cartucho-historico.webp",await assetData(blob));
+            }
+          }
+        }catch{/* The CSS preview still works if the image cannot be read. */}
+      }
       project.repoLoaded=true;project.detail=false;project.selectedIndex=0;project.edited=false;
       htmlEditor.value=data.html;cssEditor.value=data.css;
       repoStatus.textContent="Prévia versionada carregada. Use ↑↓ e A/B no console para navegar; edições locais não atualizam o GitHub automaticamente.";
