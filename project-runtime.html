@@ -24,7 +24,19 @@
   window.addEventListener("message",event=>{
     if(!allowedSource(event))return;
     const payload=event.data;
-    if(!payload||payload.type!=="r36s-web-lab-runtime-v1")return;
+    if(!payload)return;
+    if(payload.type==="r36s-web-lab-control-v1"){
+      const keys={up:"ArrowUp",down:"ArrowDown",left:"ArrowLeft",right:"ArrowRight",
+        confirm:"Enter",back:"Escape",menu:"m",l1:"q",r1:"e",l2:"z",r2:"c"};
+      const key=keys[payload.control];
+      if(key){
+        for(const type of ["keydown","keyup"]){
+          document.dispatchEvent(new KeyboardEvent(type,{key,code:key.length===1?"Key"+key.toUpperCase():key,bubbles:true,cancelable:true}));
+        }
+      }
+      return;
+    }
+    if(payload.type!=="r36s-web-lab-runtime-v1")return;
     if(typeof payload.html!=="string"||typeof payload.css!=="string"||
        !Array.isArray(payload.scripts)||payload.html.length>2_000_000||payload.css.length>2_000_000||
        payload.scripts.length>40){error("Arquivos excedem os limites do modo web.");return;}
