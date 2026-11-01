@@ -1,131 +1,81 @@
 # R36S Web Lab
 
-Simulador visual do R36S e laboratório de personalização do EmulationStation, desenvolvido para funcionar diretamente no navegador.
+Laboratório web de interface, visualização do R36S e inspeção local de imagens de firmware. O projeto é independente da comunidade ArkOS, EmulationStation e Sketchfab.
 
-> **Escopo:** este projeto é uma reprodução interativa de interface. **Não é uma máquina virtual do ArkOS, um emulador de hardware RK3326 ou um executador de ROMs.** Os indicadores de bateria e status são ilustrativos.
+> **Importante:** o projeto não inicializa o firmware real do R36S e não é um emulador do SoC Rockchip RK3326. O ROM Player usa núcleos de terceiros no navegador para jogos compatíveis, não executa o sistema operacional ArkOS.
 
-![Prévia do R36S Web Lab](docs/preview.png)
+![Prévia da interface simulada](docs/preview.png)
 
-## Recursos
+## Ferramentas
 
-- Console R36S construído com HTML e CSS, com tela simulada na proporção 4:3.
-- Navegação por teclado, botões virtuais e Gamepad API (mapeamento padrão).
-- Listas demonstrativas de sistemas e jogos sem distribuir ROMs ou BIOS.
-- Editor de cores, fundos, escala tipográfica e efeito LCD, com prévia em tempo real.
-- Exportação de um `theme.xml` inicial para testes em builds compatíveis do EmulationStation.
-- Importação local de `gamelist.xml` com validação e limites de tamanho.
-- Exportação em JSON da sessão atual.
-- Preferências de aparência salvas localmente no navegador.
-- Sem servidores próprios, rastreamento ou dependências JavaScript externas.
+- **Modelo 3D:** incorporação oficial do [R36S console de Moh1993 no Sketchfab](https://sketchfab.com/3d-models/r36s-console-c6ecbfabf473479a8ffd73149090c5bb), com câmera interativa e atribuição permanente.
+- **Simulador:** menus 2D, botões, teclado e Gamepad API. A tela 2D não está conectada à superfície do modelo do Sketchfab.
+- **Firmware Lab:** importa localmente arquivos .img, .iso, .img.xz, .img.gz, .zip e .dtb. Lê os primeiros 34 KiB e identifica assinaturas MBR, ISO 9660, FDT e partições MBR quando disponíveis. Não descomprime nem executa firmware.
+- **ROM Player (beta):** interface separada para arquivos próprios de NES, SNES, Game Boy, Game Boy Advance e PlayStation 1, por meio de [EmulatorJS](https://emulatorjs.org/). ROMs, ISOs de jogo e BIOS não são distribuídas. Compatibilidade experimental; ainda depende de verificação prática com arquivos reais e ambiente de navegador.
+- **Theme Studio:** prévia 2D de paleta, fundo, fonte e linhas LCD, com exportação de XML experimental do EmulationStation.
+- **Biblioteca:** importação local e limitada de gamelist.xml, sem execução dos arquivos listados.
+- **Hardware:** especificações de referência; clones, revisões de placa e painéis diferem.
 
-## Executar localmente
+## Arquivos .img e .iso: diferença
 
-O site é estático: nenhuma instalação de dependências é necessária. Abra `index.html` em um navegador moderno, ou sirva os arquivos por HTTP para evitar limitações de módulos ES locais.
+O ArkOS usado no R36S é geralmente distribuído como **imagem de cartão microSD**, muitas vezes no formato .img.xz. O firmware depende de bootloader, device tree, kernel, GPU, periféricos e componentes específicos do RK3326. Abrir ou reconhecer suas partições **não equivale a dar boot**.
 
-Com Python:
+Uma .iso normalmente descreve um disco óptico. O ROM Player pode tentar abrir algumas imagens de **disco de jogo PlayStation 1** como .iso, mas isso **não inicializa ArkOS**. Imagens de cartão ArkOS são inspecionadas somente no Firmware Lab. Arquivos CUE/BIN com múltiplos arquivos não são suportados pelo carregamento atual.
+
+Para emular o sistema completo será preciso um backend/simulador de hardware próprio, com testes específicos dos periféricos e do kernel. Um QEMU genérico não garante que a imagem original do R36S inicialize.
+
+## Execução local
+
+Hospede a pasta usando HTTP:
 
 ```bash
 python3 -m http.server 4173
 ```
 
-No Windows:
+Abra http://localhost:4173. O site também é publicado via GitHub Pages após a habilitação do Pages na configuração do repositório.
 
-```powershell
-py -m http.server 4173
-```
-
-Acesse `http://localhost:4173`.
-
-Para os testes automatizados, instale Node.js 20 ou superior e execute:
+Para executar os testes unitários, com Node.js 22 ou superior:
 
 ```bash
 npm test
 ```
 
-## Teclas
 
-| Ação | Teclado |
-| --- | --- |
-| Navegar | Setas |
-| Confirmar | Enter |
-| Voltar | Esc / Backspace |
-| Menu | M |
+## Dados, privacidade e terceiros
 
-Os controles USB/Bluetooth que usam o mapeamento padrão de Gamepad API também são suportados. A compatibilidade depende do navegador e do controle.
-
-## Tema experimental
-
-O botão **Exportar theme.xml** cria um arquivo XML com controles de paleta e lista de jogos do EmulationStation. Esta exportação é um **ponto de partida**: a prévia web não interpreta o motor real de temas, e forks do EmulationStation diferem em propriedades, pastas e compatibilidade.
-
-Fluxo seguro para validação:
-
-1. Faça backup do cartão microSD do R36S.
-2. Verifique a variante do console e a versão do firmware.
-3. Compare o XML com um tema funcional instalado no dispositivo.
-4. Em uma cópia de teste do tema, aplique as alterações e valide o XML.
-5. Teste no console antes de considerar o tema compatível.
-
-**Não sobrescreva arquivos do sistema, bootloader, DTB ou firmware com arquivos exportados por este projeto.** O XML gerado não é uma imagem de sistema e não modifica o dispositivo.
-
-## Privacidade e segurança
-
-- Todos os arquivos importados são lidos pelo navegador localmente.
-- O parser rejeita declarações `DOCTYPE` e `ENTITY`, limita arquivos XML a 2 MB e aceita até 2.000 nomes por biblioteca.
-- Conteúdo importado é tratado como texto e escapado ao renderizar.
-- Os dados da biblioteca ficam em memória durante a sessão. Somente as preferências visuais são persistidas no armazenamento local.
-- Nenhuma ROM, BIOS, arquivo de firmware ou arte de terceiros é redistribuída.
+- O Firmware Lab lê apenas o início do arquivo com File.slice; não transfere imagens para um servidor e não altera SD.
+- O simulador e o editor guardam apenas preferências visuais no armazenamento local. O parser de gamelist.xml rejeita DOCTYPE/ENTITY e impõe limites de tamanho e de itens.
+- A aba 3D carrega conteúdo externo diretamente dos servidores Sketchfab (inclusive sua política de privacidade, cookies e coleta técnica).
+- O ROM Player solicita a biblioteca de emulação ao CDN do EmulatorJS após a escolha de iniciar. O código do Web Lab usa object URLs para arquivos locais; bibliotecas externas podem ter comportamentos e políticas próprios. Não forneça arquivos sensíveis ou não autorizados.
+- Nenhum arquivo de firmware, ROM, BIOS, modelo 3D ou textura de terceiros está incorporado ao repositório.
+- Utilize apenas dumps e arquivos que você tenha direito de executar. Faça backup antes de modificar um R36S físico.
 
 ## Estrutura
 
 ```text
-r36s-web-lab/
-├── index.html
-├── styles.css
-├── assets/
-│   └── icon.svg
-├── src/
-│   ├── app.js
-│   ├── model.js
-│   └── export.js
-├── tests/
-│   └── model.test.js
-└── .github/workflows/
-    ├── ci.yml
-    └── pages.yml
+index.html                interface principal
+styles.css                estilos e responsividade
+rom-player.html           ambiente de execução de ROM separado
+rom-player.css            estilos do ambiente ROM Player
+src/app.js                navegação e simulação 2D
+src/model.js              modelo de dados e exportação XML
+src/firmware.js           inspeção de cabeçalho de imagem em leitura
+src/firmware-ui.js        interface para inspeção de imagens
+src/rom-player.js         inicialização do EmulatorJS sob demanda
+tests/                    testes unitários
+.github/workflows/        integração contínua e Pages
 ```
 
-## GitHub Pages
 
-1. Crie um repositório no GitHub e envie os arquivos para a branch `main`.
-2. Abra **Settings → Pages** e escolha **GitHub Actions** como fonte de publicação.
-3. O workflow `pages.yml` publica os arquivos estáticos a cada push em `main`.
-4. O endereço padrão será `https://SEU-USUARIO.github.io/NOME-DO-REPOSITORIO/`.
+## Publicação
 
-Para atualizar o projeto depois:
+No repositório GitHub, abra Settings → Pages e selecione **GitHub Actions** em Build and deployment → Source. Depois execute o workflow em Actions. Sem essa configuração, actions/configure-pages pode falhar com HTTP 404 antes de publicar qualquer arquivo.
 
-```bash
-git add .
-git commit -m "feat: improve theme preview"
-git push origin main
-```
+## Créditos e licenças
 
-## Próximos passos
+- Modelo incorporado: [R36S console](https://sketchfab.com/3d-models/r36s-console-c6ecbfabf473479a8ffd73149090c5bb) por [Moh1993](https://sketchfab.com/Moh1993), hospedado no Sketchfab. O arquivo 3D **não** faz parte desta distribuição. Direitos do autor preservados.
+- Emulação opcional: [EmulatorJS](https://github.com/EmulatorJS/EmulatorJS), software independente disponibilizado por CDN, sob as respectivas licenças e termos.
+- ArkOS: [AeolusUX/ArkOS-R3XS](https://github.com/AeolusUX/ArkOS-R3XS) e [ArkOS Wiki](https://github.com/christianhaitian/arkos/wiki).
+- Interface de temas: [EmulationStation THEMES.md](https://github.com/Aloshi/EmulationStation/blob/master/THEMES.md).
 
-- Importar pastas completas de temas (incluindo `theme.xml`, `include` e assets).
-- Prévia fiel de múltiplos layouts de EmulationStation e modos de lista.
-- Analisador de `theme.xml`, com warnings e comparação de propriedades.
-- Importação/exportação de projetos JSON no navegador.
-- Testes de compatibilidade documentados com modelos reais de R36S.
-
-## Referências e compatibilidade
-
-- [Handhelds Wiki — R36S](https://handhelds.wiki/R36S)
-- [Handhelds Wiki — Clones e variantes](https://handhelds.wiki/R36S_Clones)
-- [EmulationStation — Especificação de temas](https://github.com/Aloshi/EmulationStation/blob/master/THEMES.md)
-- [ArkOS — documentação da comunidade](https://github.com/Bassett88/arkosR36S)
-
-R36S, ArkOS, EmulationStation e as plataformas citadas pertencem aos seus respectivos titulares. Este projeto é independente e não possui vínculo ou endosso dos desenvolvedores e fabricantes.
-
-## Licença
-
-MIT. Consulte [LICENSE](LICENSE). A licença abrange apenas os arquivos originais deste repositório, não softwares, marcas ou materiais de terceiros.
+O código original do R36S Web Lab é MIT (LICENSE). A licença MIT deste repositório não abrange modelos externos, componentes do Sketchfab, núcleos de emulação, ArkOS, ROMs ou BIOS.
