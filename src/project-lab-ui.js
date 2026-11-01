@@ -223,6 +223,7 @@ export function renderProjectPanel(inspector,heading,showToast,id){
       htmlEditor.value=data.html;cssEditor.value=data.css;
       repoStatus.textContent="Prévia versionada carregada. Use ↑↓ e A/B no console para navegar; edições locais não atualizam o GitHub automaticamente.";
       projectPreview(id);
+      if(force)saveDrafts(); // A deliberate reload replaces the old browser draft.
       auditAction("project_source_loaded",{section:id,count:2});
     }catch(error){repoStatus.textContent="Falha ao carregar referência: "+error.message;}
     finally{fetching=false;}
