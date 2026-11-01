@@ -379,12 +379,14 @@ export function renderProjectPanel(inspector,heading,showToast,id){
     try{
       const result=await loadFiles(id,event.target.files);
       htmlEditor.value=project.html;cssEditor.value=project.css;showFileBrowser();
-      const compatibility=classifyProjectManifest(result.manifest);
+      const compatibility=result.nativePreview
+        ?{kind:"go-arm-pokeforge-adapter",preview:true,explanation:"PokeForge R36S nativo (Go/ARM, /dev/fb0) detectado. A tela agora mostra uma adaptação navegável baseada na estrutura real do projeto, com "+result.nativeCatalogCount+" espécies do catálogo do ZIP. Use L2/R2 para trocar de aba, L1/R1 para boxes/gerações e A/B para abrir/voltar. Os executáveis ARM não foram iniciados, nem os saves modificados."}
+        :classifyProjectManifest(result.manifest);
       indicator.textContent=result.manifest.count+" arquivos: "+result.manifest.html+" HTML, "+
         result.manifest.css+" CSS, "+result.manifest.javascript+" JS, "+
         result.manifest.source+" fontes/configuração, "+result.manifest.images+" imagens.";
       diagnostic.textContent=compatibility.explanation;
-      status.textContent=compatibility.preview?"Prévia carregada. JavaScript web requer ativação explícita.":"Projeto inventariado, mas ainda não executável como interface web.";
+      status.textContent=result.nativePreview?"Adaptador PokeForge Go/ARM ativo: telas navegáveis, sem execução nativa.":compatibility.preview?"Prévia carregada. JavaScript web requer ativação explícita.":"Projeto inventariado, mas ainda não executável como interface web.";
       showToast(compatibility.preview?"Frontend importado e pronto para visualização.":"Arquivos importados; veja o diagnóstico de compatibilidade.");
     }catch(error){
       indicator.textContent="Não foi possível importar a pasta.";
@@ -406,7 +408,7 @@ export function renderProjectPanel(inspector,heading,showToast,id){
         result.manifest.javascript+" JS, "+result.manifest.source+" fontes/configuração, "+
         result.manifest.images+" imagens.";
       diagnostic.textContent=compatibility.explanation;
-      status.textContent=compatibility.preview?"Prévia pronta; o JavaScript está desligado por padrão.":"ZIP importado, mas sem frontend HTML executável nesta versão.";
+      status.textContent=result.nativePreview?"Simulador de interface PokeForge ativo. ArkOS nativo ainda não executado.":compatibility.preview?"Prévia pronta; o JavaScript está desligado por padrão.":"ZIP importado, mas sem frontend HTML executável nesta versão.";
       showToast(compatibility.preview?"ZIP importado e prévia exibida.":"ZIP analisado: confira o diagnóstico no painel.");
     }catch(error){
       indicator.textContent="Não foi possível abrir este ZIP.";
