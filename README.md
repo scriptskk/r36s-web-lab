@@ -1,5 +1,8 @@
 # R36S Web Lab
 
+**NOVO — Slot.R36S e PKForge R36S:** workspaces visuais com importação local de HTML/CSS/imagens e prévia imediata dentro da tela virtual de 640×480. Os arquivos originais desses projetos precisam ser importados; nenhum frontend foi presumido ou copiado automaticamente. Não inicializa ArkOS nem executa JavaScript importado. [Como usar o laboratório de projetos](docs/PROJECT_LIVE_STUDIOS.md).
+
+
 **Hospedagem gratuita e privada:** [Cloudflare Workers + Access + D1](docs/CLOUDFLARE_FREE.md). O deploy não foi ativado: necessita conectar sua conta Cloudflare, configurar D1, Access e segredos. O backend Flask/Render permanece como opção, mas não é necessário no caminho gratuito.
 
 Open-source tools for working with R36S user interfaces, inspecting local firmware headers and cataloguing extracted backup folders. Includes a separate private server with login and SQLite activity records.
