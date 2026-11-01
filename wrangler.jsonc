@@ -13,7 +13,7 @@
     {
       "binding": "DB",
       "database_name": "r36s-web-lab",
-      "database_id": "REPLACE_WITH_YOUR_D1_DATABASE_UUID"
+      "database_id": "74e4edd3-67a6-4bf6-b7bf-25a83a0c7682"
     }
   ],
   "observability": {
