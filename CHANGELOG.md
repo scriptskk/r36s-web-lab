@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.8.1] — 2026-11-01
+
+- Fixed ZIP import for source archives with large central directories by skipping node_modules and caches.
+- Recognize and inventory React/Vite/TypeScript, Python, Lua and project configuration source files without executing them.
+- Show clear diagnosis when an imported project needs a web build, uses ArkOS/EmulationStation XML, or has no browser-run HTML.
+- Added realistic deflate-compressed ZIP regression tests and kept user files local to the browser.
+- Native RK3326/ArkOS execution remains unsupported; real project archives are required for further compatibility work.
+
+
 ## [0.8.0] — 2026-11-01
 
 - Clickable L1, L2, R1 and R2 shoulder controls outside the front photo, with keyboard Q/E/Z/C and standard Gamepad indices 4–7.
