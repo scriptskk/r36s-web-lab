@@ -94,10 +94,10 @@ def create_app():
     def secure_headers(response):
         response.headers["X-Content-Type-Options"] = "nosniff"
         response.headers["Referrer-Policy"] = "no-referrer"
-        response.headers["X-Frame-Options"] = "DENY"
+        response.headers["X-Frame-Options"] = "SAMEORIGIN"
         response.headers["Cache-Control"] = "no-store"
         response.headers["Content-Security-Policy"] = (
-            "default-src 'self'; base-uri 'none'; form-action 'self'; frame-ancestors 'none'; "
+            "default-src 'self'; base-uri 'none'; form-action 'self'; frame-ancestors 'self'; "
             "frame-src 'self' https://sketchfab.com; object-src 'none'; "
             "script-src 'self' https://cdn.emulatorjs.org 'wasm-unsafe-eval'; "
             "connect-src 'self' blob: https://cdn.emulatorjs.org; "
