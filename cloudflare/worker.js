@@ -1,4 +1,5 @@
 import {createRemoteJWKSet, jwtVerify} from "jose";
+import {configurationIssues, normalizeTeamDomain} from "./config.js";
 
 const ALLOWED_ACTIONS = new Set([
   "theme_updated","theme_exported","theme_reset","gamelist_imported",
@@ -26,19 +27,6 @@ const json=(value,status=200)=>new Response(JSON.stringify(value), {
   }
 });
 
-function normalizeTeamDomain(value) {
-  if(typeof value!=="string")return null;
-  try {
-    const u=new URL(value);
-    return u.protocol==="https:" && /^[a-z0-9-]+\.cloudflareaccess\.com$/i.test(u.hostname)
-      && u.pathname==="/" && !u.search && !u.hash ? u.origin : null;
-  } catch{return null;}
-}
-function ready(env){
-  return !!normalizeTeamDomain(env.TEAM_DOMAIN) && !!env.POLICY_AUD &&
-    /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(env.ADMIN_EMAIL||"") &&
-    typeof env.CSRF_SECRET==="string" && env.CSRF_SECRET.length>=32 && !!env.DB && !!env.ASSETS;
-}
 // The built-in Worker static assets router does not propagate ctx.access.
 // We validate the signed Access JWT on EVERY request including static assets.
 async function accessIdentity(request,env){
@@ -92,7 +80,8 @@ function metadata(details){
 
 export default {
   async fetch(request,env){
-    if(!ready(env))return json({error:"Instância não configurada. Defina Access, D1 e CSRF_SECRET."},503);
+    const issues=configurationIssues(env);
+    if(issues.length)return json({error:"Instância não configurada.",verificar:issues},503);
     const identity=await accessIdentity(request,env);
     if(!identity)return json({error:"Acesso negado. Faça login pelo Cloudflare Access."},403);
     const {pathname}=new URL(request.url);
