@@ -24,5 +24,5 @@ export async function getCommunitySource(id,fetchImpl=fetch){
     return content;
   }
   const [html,css]=await Promise.all([load(paths.html),load(paths.css)]);
-  return {...paths,html,css,source:COMMUNITY_SOURCES[id]};
+  return {htmlPath:paths.html,cssPath:paths.css,html,css,source:COMMUNITY_SOURCES[id]};
 }
