@@ -27,3 +27,17 @@
 .audit-event strong{font-weight:650;color:#dfedff}
 .audit-event small,.audit-event span{color:#8299b4;font-size:10px}
 @media(max-width:410px){.console-shell{transform:scale(.75);flex-shrink:0}.console-wrap{min-height:430px;max-height:465px;overflow:hidden}}
+
+
+/* Slot.R36S / PKForge: fixed 640×480 HTML viewport, uniformly scaled into the shell.
+   The embedded document has an opaque origin and cannot run JavaScript. */
+.project-preview-frame{position:absolute;top:0;left:0;width:640px;height:480px;
+  transform-origin:top left;border:0;background:#111a27;z-index:5;display:block}
+.project-editor{display:block;width:100%;max-width:100%;min-width:100%;resize:vertical;
+  min-height:105px;max-height:320px;margin:8px 0 12px;background:#0c1420;
+  color:#cce2f7;border:1px solid #3b5068;border-radius:8px;padding:10px;
+  font:11px/1.55 ui-monospace,SFMono-Regular,Consolas,monospace}
+.project-editor:focus{outline:2px solid #77b1e9;outline-offset:1px}
+.project-extra-label{display:block;margin-top:15px}
+#projectImportStatus{overflow-wrap:anywhere}
+.console-screen .project-preview-frame:focus{outline:0}
