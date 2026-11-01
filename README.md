@@ -1,5 +1,8 @@
 # R36S Web Lab
 
+**v0.7 — Projetos históricos no laboratório:** pastas [SLOT36S](community/slot36s/) e [PKForge R36S](community/pkforge-r36s/) exportadas como referências versionadas no GitHub. Abra a pasta **Projetos da comunidade** e escolha um projeto para carregar a prévia 640×480, editar HTML/CSS e testar a navegação pelos botões R36S. [Catálogo e proveniência](community/README.md). *A fonte original do Slot e do PKForge não foi localizada; o Slot é uma reconstrução baseada em referência histórica e o PKForge é placeholder explícito.*
+
+
 **v0.6 — R36S PHOTO EDITION:** serious monochrome black/white interface (with page light/dark toggle), native image of the R36S provided for this project, interactive 640x480 screen overlaid on that image, touch/click hotspots aligned to photographed controls and community project folders. Removed colored blue containers from the page. Pixel-like micro-labels are used sparingly. [Visual redesign details](docs/MONOCHROME_REDESIGN.md).
 
 
