@@ -205,7 +205,7 @@ export function renderProjectPanel(inspector,heading,showToast,id){
       if(!inspector.isConnected)return;
       if(!force && (project.edited||project.html||project.css))return;
       project.html=data.html;project.css=data.css;project.assetMap=new Map();
-      project.entry=data.html.slice(2);project.cssEntry=data.css.slice(2);
+      project.entry=data.htmlPath.slice(2);project.cssEntry=data.cssPath.slice(2);
       project.repoLoaded=true;project.detail=false;project.selectedIndex=0;project.edited=false;
       htmlEditor.value=data.html;cssEditor.value=data.css;
       repoStatus.textContent="Prévia versionada carregada. Use ↑↓ e A/B no console para navegar; edições locais não atualizam o GitHub automaticamente.";
