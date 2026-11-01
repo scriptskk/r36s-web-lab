@@ -1,13 +1,31 @@
-# SLOT36S — referência recuperada
+# SLOT36S
 
-**Origem verificável:** conversas anteriores do projeto de personalização do R36S, com prioridade para cartuchos e mídias reais, interface limpa e fidelidade visual ao layout de referência. Um arquivo histórico chamado **Cartucho Game Boy Advance com Paisagem Fantástica.png** foi localizado na biblioteca do usuário. Uma cópia compactada em WebP dessa arte histórica agora está em `assets/cartucho-historico.webp`, e a prévia HTML a exibe na tela. Isso preserva a **referência visual**, mas não recupera o aplicativo original, seus códigos ou suas animações.
+Interface experimental de navegação por mídias para o R36S.
 
-## Arquivos desta pasta
+## Visão geral
 
-- `preview.html`: tela de catálogo reconstruída com cartucho GBA e opções navegáveis.
-- `style.css`: aparência do cartucho e layout em 640 × 480.
-- `README.md`: origem, escopo e atualização.
+Este diretório reúne uma prévia interativa do catálogo de cartuchos, adaptada para a tela de **640 × 480 (4:3)**. A primeira implementação utiliza um cartucho de Game Boy Advance como referência visual.
 
-Para substituir a reconstrução pelo projeto real, adicione os fontes e assets originais legalmente disponíveis, atualize `preview.html` e `style.css` e deixe o Cloudflare publicar. Não adicione ROMs nem imagens de cartão.
+A prévia serve para validar composição, dimensões, organização da biblioteca e comportamento dos controles antes da integração com o tema definitivo do aparelho.
 
-**Estado:** referência visual reconstruída; não é o aplicativo original SLOT36S, nem tema EmulationStation validado em hardware.
+## Estrutura
+
+| Arquivo | Descrição |
+| --- | --- |
+| [preview.html](preview.html) | Composição da tela e itens navegáveis |
+| [style.css](style.css) | Estilos do catálogo e do cartucho |
+| [assets/cartucho-historico.webp](assets/cartucho-historico.webp) | Arte de referência usada na prévia |
+
+## Como testar
+
+1. Acesse o R36S Web Lab.
+2. Abra **Projetos da Comunidade → SLOT36S**.
+3. Selecione **Carregar / atualizar prévia do GitHub**.
+4. Utilize o direcional, A/B ou o teclado para explorar os itens.
+5. Edite HTML e CSS no workspace para comparar alterações na tela do console.
+
+## Compatibilidade
+
+Esta implementação é uma **prévia web**. Não constitui um tema EmulationStation instalado no ArkOS e não inicializa ROMs ou aplicativos do R36S. A integração de recursos nativos dependerá dos arquivos e das especificações correspondentes.
+
+Não inclua ROMs, BIOS, backups pessoais ou credenciais neste repositório.
