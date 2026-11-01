@@ -4,7 +4,7 @@ import {getCommunitySource,COMMUNITY_SOURCES} from "./community-loader.js";
 import {unzipSourceFiles} from "./zip-import.js";
 
 const STORAGE="r36s-web-lab:project-drafts:v1";
-const projects=Object.fromEntries(PROJECTS.map(p=>[p.id,{html:"",css:"",assetMap:new Map(),fileCount:0,xmlCount:0,repoLoaded:false,selectedIndex:0,detail:false,edited:false}]));
+const projects=Object.fromEntries(PROJECTS.map(p=>[p.id,{html:"",css:"",assetMap:new Map(),fileCount:0,xmlCount:0,localFiles:[],htmlEntries:[],repoLoaded:false,selectedIndex:0,detail:false,edited:false}]));
 function readDrafts(){
   try{
     const drafts=JSON.parse(localStorage.getItem(STORAGE)||"{}");
@@ -161,6 +161,8 @@ async function loadFiles(id,files){
   project.assetMap=data;project.fileCount=manifest.count;project.xmlCount=manifest.files.filter(f=>f.category==="xml").length;
   project.repoLoaded=false;project.detail=false;project.selectedIndex=0;project.edited=true;
   project.html=html;project.css=cssParts.join("\n");
+  project.localFiles=manifest.files.map((item,i)=>({...item,blob:selected[i]}));
+  project.htmlEntries=project.localFiles.filter(item=>item.category==="html");
   project.entry=chosen?.path||"index.html";
   project.cssEntry=cssFiles[0]?.path||project.entry;
   saveDrafts();
@@ -186,6 +188,8 @@ export function renderProjectPanel(inspector,heading,showToast,id){
     '<label for="projectFolder" class="form-label project-extra-label">Ou importar pasta de frontend (HTML, CSS, imagens)</label><input class="firmware-file" id="projectFolder" type="file" webkitdirectory multiple>'+
     '<label for="projectFiles" class="form-label project-extra-label">Ou selecionar arquivos individualmente</label><input class="firmware-file" id="projectFiles" type="file" multiple accept=".html,.htm,.css,.js,.mjs,.xml,.png,.jpg,.jpeg,.gif,.webp">'+
     '<div class="fine-print" id="projectImportStatus">'+(project.fileCount?project.fileCount+' arquivos nesta sessão.':'Nenhum arquivo importado. Projetos existentes não foram sincronizados automaticamente.')+'</div>'+
+    '<label for="projectEntrySelect" class="form-label project-extra-label">Tela HTML inicial</label><select id="projectEntrySelect" class="field-select" aria-label="Escolher arquivo HTML para visualizar"><option value="">Nenhum arquivo local selecionado</option></select>'+
+    '<details class="project-files-detail"><summary>Explorar arquivos importados</summary><div class="project-file-list" id="projectFileList" role="list"></div></details>'+
     '<p class="fine-print">Os arquivos ficam no seu navegador. ZIP até 32 MB, conteúdo até 16 MB. HTML/CSS e imagens criam uma prévia; JavaScript e programas ARM são identificados, mas não executados nesta modalidade segura. Imagens ArkOS .img não são inicializadas.</p></div>'+
     '<div class="inspector-card"><div class="card-heading">EDIÇÃO AO VIVO <span class="card-kicker">640 × 480</span></div>'+
     '<label for="projectHtmlEditor" class="form-label">HTML</label><textarea id="projectHtmlEditor" class="project-editor" rows="6" spellcheck="false" placeholder="Importe o HTML real do projeto ou edite aqui..."></textarea>'+
@@ -197,6 +201,36 @@ export function renderProjectPanel(inspector,heading,showToast,id){
   const cssEditor=inspector.querySelector("#projectCssEditor");
   const status=inspector.querySelector("#projectLiveStatus");
   htmlEditor.value=project.html;cssEditor.value=project.css;
+  const entrySelect=inspector.querySelector("#projectEntrySelect");
+  const fileList=inspector.querySelector("#projectFileList");
+  function showFileBrowser(){
+    entrySelect.replaceChildren();
+    if(!project.htmlEntries.length){
+      const option=document.createElement("option");option.value="";option.textContent="Sem HTML local";entrySelect.append(option);
+    }
+    for(const file of project.htmlEntries){
+      const option=document.createElement("option");option.value=file.path;option.textContent=file.path;entrySelect.append(option);
+    }
+    entrySelect.value=project.entry||"";
+    fileList.replaceChildren();
+    for(const file of project.localFiles){
+      const el=document.createElement("div");
+      el.setAttribute("role","listitem");el.className="project-file-row";
+      const name=document.createElement("span");name.textContent=file.path;
+      const meta=document.createElement("small");meta.textContent=file.category.toUpperCase()+" · "+Math.ceil(file.size/1024)+" KB";
+      el.append(name,meta);fileList.append(el);
+    }
+  }
+  showFileBrowser();
+  entrySelect.addEventListener("change",async()=>{
+    const entry=project.htmlEntries.find(file=>file.path===entrySelect.value);
+    if(!entry)return;
+    project.entry=entry.path;
+    project.html=await entry.blob.text();
+    project.selectedIndex=0;project.detail=false;project.edited=true;
+    htmlEditor.value=project.html;saveDrafts();projectPreview(id);
+    auditAction("project_preview_updated",{section:id});
+  });
   const repoStatus=inspector.querySelector("#projectRepoStatus");
   let fetching=false;
   async function reloadFromRepo(force=false){
@@ -222,6 +256,7 @@ export function renderProjectPanel(inspector,heading,showToast,id){
         }catch{/* The CSS preview still works if the image cannot be read. */}
       }
       project.repoLoaded=true;project.detail=false;project.selectedIndex=0;project.edited=false;
+      project.localFiles=[];project.htmlEntries=[];showFileBrowser();
       htmlEditor.value=data.html;cssEditor.value=data.css;
       repoStatus.textContent="Prévia versionada carregada. Use ↑↓ e A/B no console para navegar; edições locais não atualizam o GitHub automaticamente.";
       projectPreview(id);
@@ -250,7 +285,7 @@ export function renderProjectPanel(inspector,heading,showToast,id){
     indicator.textContent="Lendo arquivos locais...";
     try{
       const result=await loadFiles(id,event.target.files);
-      htmlEditor.value=project.html;cssEditor.value=project.css;
+      htmlEditor.value=project.html;cssEditor.value=project.css;showFileBrowser();
       indicator.textContent=result.manifest.count+" arquivo(s), "+result.manifest.images+" imagem(ns), "+result.manifest.css+" CSS, "+result.manifest.html+" HTML e "+result.manifest.javascript+" JavaScript (não executado). "+
       (result.htmlFound?"Prévia disponível.":"Nenhum HTML encontrado: editor/visualização continuam como rascunho.");
       showToast("Arquivos analisados localmente. Nenhum backup ou ROM foi enviado.");
@@ -264,7 +299,7 @@ export function renderProjectPanel(inspector,heading,showToast,id){
     try{
       const files=await unzipSourceFiles(zip);
       const result=await loadFiles(id,files);
-      htmlEditor.value=project.html;cssEditor.value=project.css;
+      htmlEditor.value=project.html;cssEditor.value=project.css;showFileBrowser();
       indicator.textContent="ZIP importado: "+result.manifest.count+" arquivos compatíveis, "+
         result.manifest.html+" HTML, "+result.manifest.css+" CSS, "+result.manifest.javascript+
         " JS identificados (sem execução), "+result.manifest.images+" imagens. "+
