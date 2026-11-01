@@ -4,7 +4,7 @@ import {getCommunitySource,COMMUNITY_SOURCES} from "./community-loader.js";
 import {unzipSourceFiles} from "./zip-import.js";
 
 const STORAGE="r36s-web-lab:project-drafts:v1";
-const projects=Object.fromEntries(PROJECTS.map(p=>[p.id,{html:"",css:"",assetMap:new Map(),fileCount:0,xmlCount:0,localFiles:[],htmlEntries:[],repoLoaded:false,selectedIndex:0,detail:false,edited:false}]));
+const projects=Object.fromEntries(PROJECTS.map(p=>[p.id,{html:"",css:"",assetMap:new Map(),fileCount:0,xmlCount:0,localFiles:[],htmlEntries:[],scriptMap:new Map(),runJS:false,repoLoaded:false,selectedIndex:0,detail:false,edited:false}]));
 function readDrafts(){
   try{
     const drafts=JSON.parse(localStorage.getItem(STORAGE)||"{}");
@@ -97,6 +97,11 @@ function navigablePreview(html,p){
 }
 export function navigateProject(id,control){
   const p=projects[id];if(!p||!p.html)return false;
+  if(p.runJS){
+    const frame=document.getElementById("projectPreviewFrame");
+    frame?.contentWindow?.postMessage({type:"r36s-web-lab-control-v1",control},"*");
+    return true;
+  }
   const doc=new DOMParser().parseFromString(p.html,"text/html");
   const count=doc.querySelectorAll("[data-lab-item]").length;
   if(!count)return false;
@@ -109,13 +114,53 @@ export function navigateProject(id,control){
   projectPreview(id);
   return true;
 }
+function localScripts(p){
+  if(!p.html||!p.runJS)return [];
+  const documentSource=new DOMParser().parseFromString(p.html,"text/html");
+  const found=[];
+  for(const element of [...documentSource.querySelectorAll("script")]){
+    if(found.length>=40)break;
+    const type=(element.getAttribute("type")||"").toLowerCase();
+    if(type && !["module","text/javascript","application/javascript"].includes(type))continue;
+    const path=element.getAttribute("src");
+    let code=path?assetFor(p.scriptMap,p.entry||"index.html",path):element.textContent;
+    if(typeof code!=="string" || code.length>1_000_000)continue;
+    found.push({code,kind:type==="module"?"module":"classic"});
+  }
+  return found;
+}
+export function stopProjectRuntime(){
+  for(const project of Object.values(projects))project.runJS=false;
+  const frame=document.getElementById("projectPreviewFrame");
+  if(frame){
+    frame.onload=null;
+    frame.removeAttribute("srcdoc");
+    frame.setAttribute("sandbox","");
+    frame.src="about:blank";
+  }
+}
 export function projectPreview(id){
   const p=projects[id];if(!p)return;
   const frame=document.getElementById("projectPreviewFrame");
   if(!frame)return;
   const entry=p.entry||"index.html";
-  const html=p.html.trim()?navigablePreview(sandboxHTML(p.html,p.assetMap,entry),p):placeholder(id);
-  frame.srcdoc=previewPage(html,sandboxCSS(p.css,p.assetMap,p.cssEntry||entry));
+  const html=p.html.trim()?sandboxHTML(p.html,p.assetMap,entry):placeholder(id);
+  const css=sandboxCSS(p.css,p.assetMap,p.cssEntry||entry);
+  if(p.runJS){
+    // Opt-in, opaque-origin iframe. Scripts cannot reach the authenticated
+    // application, Cloudflare bindings, parent storage, network or forms.
+    frame.setAttribute("sandbox","allow-scripts");
+    frame.removeAttribute("srcdoc");
+    const payload={type:"r36s-web-lab-runtime-v1",html,css,scripts:localScripts(p)};
+    frame.onload=()=>frame.contentWindow?.postMessage(payload,"*");
+    frame.src="./project-runtime.html";
+  }else{
+    frame.onload=null;
+    frame.setAttribute("sandbox","");
+    frame.removeAttribute("src");
+    const screen=navigablePreview(html,p);
+    frame.srcdoc=previewPage(screen,css);
+  }
 }
 export function fitProjectFrame(){
   const frame=document.getElementById("projectPreviewFrame");
@@ -146,10 +191,12 @@ async function loadFiles(id,files){
   const chosen=preferredFile(manifest.files,"html");
   const cssFiles=manifest.files.filter(f=>f.category==="css").sort((a,b)=>a.path.localeCompare(b.path));
   const data=new Map();
+  const scriptMap=new Map();
   // Read validated and explicitly selected browser files, never send their bytes to the server.
   for(let i=0;i<manifest.files.length;i++){
     const meta=manifest.files[i],file=selected[i];
     if(meta.category==="image")data.set(meta.path,await assetData(file));
+    if(meta.category==="javascript")scriptMap.set(meta.path,await file.text());
   }
   const html=chosen?await selected[manifest.files.indexOf(chosen)].text():"";
   const cssParts=[];
@@ -158,7 +205,7 @@ async function loadFiles(id,files){
     cssParts.push("/* "+meta.path.replace(/\*\//g,"")+" */\n"+await file.text());
   }
   const project=projects[id];
-  project.assetMap=data;project.fileCount=manifest.count;project.xmlCount=manifest.files.filter(f=>f.category==="xml").length;
+  project.assetMap=data;project.scriptMap=scriptMap;project.runJS=false;project.fileCount=manifest.count;project.xmlCount=manifest.files.filter(f=>f.category==="xml").length;
   project.repoLoaded=false;project.detail=false;project.selectedIndex=0;project.edited=true;
   project.html=html;project.css=cssParts.join("\n");
   project.localFiles=manifest.files.map((item,i)=>({...item,blob:selected[i]}));
@@ -194,12 +241,15 @@ export function renderProjectPanel(inspector,heading,showToast,id){
     '<div class="inspector-card"><div class="card-heading">EDIÇÃO AO VIVO <span class="card-kicker">640 × 480</span></div>'+
     '<label for="projectHtmlEditor" class="form-label">HTML</label><textarea id="projectHtmlEditor" class="project-editor" rows="6" spellcheck="false" placeholder="Importe o HTML real do projeto ou edite aqui..."></textarea>'+
     '<label for="projectCssEditor" class="form-label project-extra-label">CSS</label><textarea id="projectCssEditor" class="project-editor" rows="6" spellcheck="false" placeholder="Alterações CSS aparecem na tela imediatamente..."></textarea>'+
-    '<p class="fine-print" id="projectLiveStatus">Prévia isolada: scripts desativados, nenhuma comunicação com servidores externos.</p>'+
+    '<p class="fine-print" id="projectLiveStatus">Prévia segura: scripts desativados por padrão. Para executar HTML/JS próprio, ative o modo experimental isolado abaixo.</p>'+
+    '<button type="button" class="action-button secondary" id="projectRuntimeToggle" aria-pressed="false">Executar JavaScript web isolado (experimental)</button>'+
+    '<p class="fine-print">Execute somente projetos de sua confiança. O modo experimental não tem acesso ao site principal nem à rede. Não executa binários ARM, firmware ou ArkOS. Dependências de API, npm, módulos externos e chamadas fetch podem não funcionar.</p>'+
     '<button type="button" class="action-button" id="projectExport">Exportar prévia HTML (não é firmware)</button></div>'+
     '<div class="notification-box">Este workspace é uma prévia web dos arquivos fornecidos. Não é a interface real do projeto até você importar o código dele. Edits ficam apenas no navegador atual; exporte o resultado para preservar uma cópia.</div>';
   const htmlEditor=inspector.querySelector("#projectHtmlEditor");
   const cssEditor=inspector.querySelector("#projectCssEditor");
   const status=inspector.querySelector("#projectLiveStatus");
+  const runtimeButton=inspector.querySelector("#projectRuntimeToggle");
   htmlEditor.value=project.html;cssEditor.value=project.css;
   const entrySelect=inspector.querySelector("#projectEntrySelect");
   const fileList=inspector.querySelector("#projectFileList");
@@ -231,6 +281,15 @@ export function renderProjectPanel(inspector,heading,showToast,id){
     htmlEditor.value=project.html;saveDrafts();projectPreview(id);
     auditAction("project_preview_updated",{section:id});
   });
+  runtimeButton.addEventListener("click",()=>{
+    if(!project.html.trim()){status.textContent="Importe primeiro uma interface HTML.";return;}
+    project.runJS=!project.runJS;
+    runtimeButton.setAttribute("aria-pressed",String(project.runJS));
+    runtimeButton.textContent=project.runJS?"Desativar JavaScript isolado":"Executar JavaScript web isolado (experimental)";
+    status.textContent=project.runJS?"JavaScript permitido somente no iframe isolado. Sem rede; compatibilidade experimental.":"JavaScript desativado. Prévia estática segura.";
+    projectPreview(id);
+    if(project.runJS)auditAction("project_runtime_launched",{section:id});
+  });
   const repoStatus=inspector.querySelector("#projectRepoStatus");
   let fetching=false;
   async function reloadFromRepo(force=false){
@@ -256,6 +315,7 @@ export function renderProjectPanel(inspector,heading,showToast,id){
         }catch{/* The CSS preview still works if the image cannot be read. */}
       }
       project.repoLoaded=true;project.detail=false;project.selectedIndex=0;project.edited=false;
+      project.runJS=false;project.scriptMap=new Map();
       project.localFiles=[];project.htmlEntries=[];showFileBrowser();
       htmlEditor.value=data.html;cssEditor.value=data.css;
       repoStatus.textContent="Prévia versionada carregada. Use ↑↓ e A/B no console para navegar; edições locais não atualizam o GitHub automaticamente.";
