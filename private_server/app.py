@@ -17,7 +17,7 @@ from flask_wtf import CSRFProtect
 from flask_wtf.csrf import generate_csrf
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
-from werkzeug.security import check_password_hash
+from werkzeug.security import check_password_hash, generate_password_hash
 
 ROOT = Path(__file__).resolve().parents[1]
 DATA_DIR = Path(os.environ.get("R36S_DATA_DIR", str(Path.home() / ".local/share/r36s-web-lab"))).expanduser().resolve()
@@ -30,7 +30,7 @@ ALLOWED_STATIC = {"index.html", "styles.css", "rom-player.html", "rom-player.css
 LOGIN_HTML = """<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>R36S Web Lab · Acesso privado</title>
 <style>:root{color-scheme:dark;font-family:system-ui,Arial,sans-serif;background:#080e18;color:#e6eefb}*{box-sizing:border-box}body{min-height:100vh;margin:0;display:grid;place-items:center;padding:20px;background:radial-gradient(ellipse at top,#18314b,#080e18 70%)}main{max-width:420px;width:100%;background:#121d2c;border:1px solid #2c435a;border-radius:14px;padding:27px}h1{margin:5px 0 10px}p{color:#9fb2c8;font-size:13px;line-height:1.6}label{display:block;margin:20px 0 7px;font-size:12px}input{width:100%;font:inherit;padding:13px;color:inherit;background:#0d1623;border:1px solid #37516b;border-radius:7px}button{margin-top:18px;font:inherit;width:100%;padding:12px;border-radius:8px;background:#28527f;border:1px solid #457baf;color:white;cursor:pointer}.error{color:#ffb4b4}.small{font-size:11px}button:focus-visible,input:focus-visible{outline:2px solid #9fcaff;outline-offset:2px}</style></head><body><main><p>R36S WEB LAB / PRIVATE WORKSPACE</p><h1>Acesso ao laboratório</h1><p>Somente a conta administradora pode acessar arquivos, ferramentas e registros desta instância.</p>
 {% if error %}<p class="error" role="alert">{{ error }}</p>{% endif %}
-<form action="/login" method="post"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><label for="password">Senha de administrador</label><input id="password" type="password" name="password" autocomplete="current-password" minlength="12" required autofocus><button type="submit">Entrar no laboratório</button></form>
+<form action="/login" method="post"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><label for="password">Senha de administrador</label><input id="password" type="password" name="password" autocomplete="current-password" minlength="20" required autofocus><button type="submit">Entrar no laboratório</button></form>
 <p class="small">A autenticação existe somente no servidor privado. Nenhuma senha é armazenada no código-fonte ou no GitHub.</p></main></body></html>"""
 
 
@@ -60,6 +60,26 @@ def setup_data():
     return key_file.read_text().strip()
 
 
+def bootstrap_admin():
+    """Provision the first admin from a provider-managed secret, never from Git."""
+    with db_connect() as db:
+        existing = db.execute("SELECT id FROM admin WHERE id=1").fetchone()
+        if existing:
+            return False
+        password = os.environ.get("R36S_INITIAL_PASSWORD", "")
+        if len(password) < 20 or len(password) > 512:
+            if os.environ.get("R36S_REQUIRE_ADMIN_ON_START") == "1":
+                raise RuntimeError("Defina R36S_INITIAL_PASSWORD (20+ caracteres) no painel privado da hospedagem.")
+            return False
+        hashed = generate_password_hash(password, method="scrypt")
+        db.execute("INSERT OR IGNORE INTO admin(id,password_hash,version) VALUES(1,?,1)", (hashed,))
+        created = db.execute("SELECT changes()").fetchone()[0] == 1
+        if created:
+            db.execute("INSERT INTO audit(action,details_json,origin) VALUES('admin_initialized','{}','server')")
+        db.commit()
+    return created
+
+
 def db_connect():
     conn = sqlite3.connect(DATA_DIR / "lab.sqlite3", timeout=10)
     conn.row_factory = sqlite3.Row
@@ -77,6 +97,7 @@ def audit(action: str, details: dict | None = None, origin="browser"):
 
 def create_app():
     secret = setup_data()
+    bootstrap_admin()
     app = Flask(__name__, static_folder=None)
     app.secret_key = secret
     app.config.update(
@@ -96,6 +117,7 @@ def create_app():
         response.headers["Referrer-Policy"] = "no-referrer"
         response.headers["X-Frame-Options"] = "SAMEORIGIN"
         response.headers["Cache-Control"] = "no-store"
+        response.headers["X-Robots-Tag"] = "noindex, nofollow, noarchive"
         response.headers["Content-Security-Policy"] = (
             "default-src 'self'; base-uri 'none'; form-action 'self'; frame-ancestors 'self'; "
             "frame-src 'self' https://sketchfab.com; object-src 'none'; "
@@ -117,13 +139,17 @@ def create_app():
     @app.before_request
     def require_auth():
         # Credentials never become available to a static hosting provider.
-        if request.path == "/login":
+        if request.path in ("/login", "/healthz"):
             return None
         if not signed_in():
             if request.path.startswith("/api/"):
                 return jsonify(error="Sessão não autenticada"), 401
             return redirect(url_for("login"))
         return None
+
+    @app.get("/healthz")
+    def healthz():
+        return jsonify(status="ok")
 
     @app.route("/login", methods=["GET", "POST"])
     @limiter.limit("5 per minute;20 per hour")
