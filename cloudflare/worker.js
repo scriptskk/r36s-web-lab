@@ -8,6 +8,11 @@ const ALLOWED_ACTIONS = new Set([
 const META_STRINGS = new Set(["system","format","section"]);
 const META_NUMBERS = new Set(["count","size_bytes"]);
 const enc=new TextEncoder();
+const jwksCache=new Map();
+function getKeys(issuer){
+  if(!jwksCache.has(issuer))jwksCache.set(issuer,createRemoteJWKSet(new URL(issuer+"/cdn-cgi/access/certs")));
+  return jwksCache.get(issuer);
+}
 
 const json=(value,status=200)=>new Response(JSON.stringify(value), {
   status,
@@ -40,7 +45,7 @@ async function accessIdentity(request,env){
   const token=request.headers.get("cf-access-jwt-assertion");
   if(!token) return null;
   const issuer=normalizeTeamDomain(env.TEAM_DOMAIN);
-  const jwks=createRemoteJWKSet(new URL(issuer+"/cdn-cgi/access/certs"));
+  const jwks=getKeys(issuer);
   try{
     const {payload,protectedHeader}=await jwtVerify(token,jwks,{
       issuer,audience:env.POLICY_AUD,algorithms:["RS256"]
