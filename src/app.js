@@ -157,7 +157,35 @@ function confirmSelection() {
   renderScreen();if(state.tab==='simulator')renderInspector();
 }
 function back() {state.view=state.view==='games'?'systems':state.view==='menu'?'systems':'systems';renderScreen();if(state.tab==='simulator')renderInspector();}
-function act(control) {if(state.tab==='slot'||state.tab==='pkforge'){if(!navigateProject(state.tab,control))showToast('Este arquivo não possui opções navegáveis. Importe um menu com data-lab-item.');return;}if(control==='up'||control==='down'||control==='left'||control==='right')navigate(control);else if(control==='confirm')confirmSelection();else if(control==='back')back();else if(control==='menu'){state.view=state.view==='menu'?'systems':'menu';state.menuIndex=0;renderScreen();}}
+function shoulder(control){
+  // Hardware shoulders are input events, not a simulation of an RK3326 CPU.
+  if(state.tab==='slot'||state.tab==='pkforge'){
+    const mapped={l1:'left',r1:'right',l2:'back',r2:'confirm'};
+    if(!navigateProject(state.tab,mapped[control]))showToast('Este projeto ainda não tem um menu navegável.');
+    return;
+  }
+  if(control==='l1'||control==='r1'){
+    state.systemIndex=(state.systemIndex+(control==='r1'?1:-1)+SYSTEMS.length)%SYSTEMS.length;
+    state.itemIndex=0;state.view='systems';renderScreen();renderInspector();
+  }else if(control==='l2'){
+    back();
+  }else if(control==='r2'){
+    if(state.view==='systems')confirmSelection();
+    else if(state.view==='games')showToast('Jogo selecionado. O ArkOS real não está em execução.');
+    else confirmSelection();
+  }
+}
+function act(control){
+  if(['l1','l2','r1','r2'].includes(control)){shoulder(control);return;}
+  if(state.tab==='slot'||state.tab==='pkforge'){
+    if(!navigateProject(state.tab,control))showToast('Este arquivo não possui opções navegáveis. Importe um menu com data-lab-item.');
+    return;
+  }
+  if(control==='up'||control==='down'||control==='left'||control==='right')navigate(control);
+  else if(control==='confirm')confirmSelection();
+  else if(control==='back')back();
+  else if(control==='menu'){state.view=state.view==='menu'?'systems':'menu';state.menuIndex=0;renderScreen();}
+}
 function setProjectFolder(open) {
   const folder=$('projectFolderToggle'),contents=$('projectFolderContents');
   if(!folder||!contents)return;
@@ -205,7 +233,7 @@ $('gamelistFile').addEventListener('change',async event=>{
 document.addEventListener('keydown',event=>{
   const target=event.target;
   if(target instanceof HTMLElement && (target.closest('button,a,input,select,textarea') || target.isContentEditable))return;
-  const keys={'ArrowUp':'up','ArrowDown':'down','ArrowLeft':'left','ArrowRight':'right','Enter':'confirm','Escape':'back','Backspace':'back','m':'menu','M':'menu'};
+  const keys={'ArrowUp':'up','ArrowDown':'down','ArrowLeft':'left','ArrowRight':'right','Enter':'confirm','Escape':'back','Backspace':'back','m':'menu','M':'menu','q':'l1','Q':'l1','e':'r1','E':'r1','z':'l2','Z':'l2','c':'r2','C':'r2'};
   if(keys[event.key]){event.preventDefault();act(keys[event.key]);}
 });
 
@@ -215,7 +243,7 @@ function pollGamepad() {
   if (gamepad) {
     if (!gamepadReady){$('gamepadStatus').textContent='GAMEPAD: CONECTADO';gamepadReady=true;}
     const pressed=new Set();
-    for(const [index,action] of [[0,'confirm'],[1,'back'],[9,'menu'],[12,'up'],[13,'down'],[14,'left'],[15,'right']]) if(gamepad.buttons[index]?.pressed)pressed.add(action);
+    for(const [index,action] of [[0,'confirm'],[1,'back'],[4,'l1'],[5,'r1'],[6,'l2'],[7,'r2'],[9,'menu'],[12,'up'],[13,'down'],[14,'left'],[15,'right']]) if(gamepad.buttons[index]?.pressed)pressed.add(action);
     const x=gamepad.axes[0]||0,y=gamepad.axes[1]||0;
     if(x<-.6)pressed.add('left');if(x>.6)pressed.add('right');if(y<-.6)pressed.add('up');if(y>.6)pressed.add('down');
     for(const name of pressed)if(!lastGamepadButtons.has(name))act(name);
