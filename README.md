@@ -4,6 +4,14 @@ Open-source tools for working with R36S user interfaces, inspecting local firmwa
 
 > The project does NOT boot ArkOS or emulate the Rockchip RK3326. Its reference profile does not limit physical CPU, RAM or GPU resources on the host machine.
 
+## Private cloud deployment
+
+The repository includes a ready-to-review Render Blueprint (`render.yaml`) with a paid web service, HTTPS endpoint, persistent SQLite disk and first-administrator password provisioning. The login protects the application, not the public GitHub source.
+
+**Deploy instructions:** [docs/RENDER_DEPLOYMENT.md](docs/RENDER_DEPLOYMENT.md). The Render account owner must connect and approve the deployment, enter a unique administrator secret in Render, and confirm any billing. The service is **not deployed yet**.
+
+A complete SD image, ArkOS boot, server-side ROM storage and RK3326 hardware emulation remain outside the current implementation.
+
 ## Current modules
 
 | Module | Function | Actual scope |
