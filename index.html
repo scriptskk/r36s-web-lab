@@ -16,7 +16,7 @@
   <body>
     <header class="topbar">
       <div class="brand"><span class="brand-mark">R<span>36</span>S</span><span class="brand-separator"></span><strong>WEB LAB</strong></div>
-      <span class="release">COMMUNITY LAB <span class="release-dot"></span> 0.7.0</span>
+      <span class="release">COMMUNITY LAB <span class="release-dot"></span> 0.8.0</span>
       <div class="top-actions"><span class="top-note"><span class="top-note-dot"></span> WORKSPACE PRIVADO</span><button id="appearanceToggle" class="appearance-toggle" type="button" aria-label="Alternar modo claro ou escuro" aria-pressed="false"><span id="appearanceIcon" aria-hidden="true">☼</span><span id="appearanceLabel">Modo claro</span></button><button id="backupButton" class="top-button" type="button">Exportar projeto <span aria-hidden="true">↗</span></button></div>
     </header>
 
@@ -66,6 +66,11 @@
           <section class="device-stage" aria-label="Prévia interativa do R36S">
             <div class="stage-topline"><span>DEVICE PREVIEW</span><span class="stage-mode">R36S · SIMULATION MODE</span></div>
             <div class="console-wrap" id="consoleWrap">
+              <div class="shoulder-strip" role="group" aria-label="Botões superiores do R36S">
+                <div class="shoulder-side"><button type="button" data-control="l2" aria-label="Gatilho traseiro L2, voltar">L2</button><button type="button" data-control="l1" aria-label="Botão superior L1, anterior">L1</button></div>
+                <span class="shoulder-caption">SHOULDER BUTTONS</span>
+                <div class="shoulder-side"><button type="button" data-control="r1" aria-label="Botão superior R1, próximo">R1</button><button type="button" data-control="r2" aria-label="Gatilho traseiro R2, selecionar">R2</button></div>
+              </div>
               <div class="console-shell" id="consoleShell">
                 <img class="console-reference-image" src="./assets/r36s-reference.webp" width="154" height="240" alt="Imagem frontal do R36S utilizada como base do console navegável" draggable="false" />
                 <div class="console-upper">
