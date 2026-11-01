@@ -1,6 +1,7 @@
 import {SYSTEMS, DEMO_GAMES, DEFAULT_THEME, safeTheme, escapeHTML, textToGames} from './model.js';
 import {exportTheme, exportSnapshot} from './export.js';
 import {renderFirmwarePanel} from './firmware-ui.js';
+import {renderBackupPanel} from './backup-ui.js';
 import {R36S_REFERENCE} from './hardware.js';
 import {auditAction,renderAuditPanel} from './audit.js';
 
@@ -12,6 +13,7 @@ const tabs = {
   simulator: ['SIMULATOR / LIVE PREVIEW', 'Seu R36S, no navegador.', 'Explore a interface e teste mudanças sem alterar o aparelho.'],
   viewer: ['DEVICE / 3D MODEL', 'O R36S em três dimensões.', 'Inspecione o modelo rotativo criado por Moh1993 no Sketchfab.'],
   firmware: ['FIRMWARE / DISK INSPECTOR', 'Analise imagens do ArkOS.', 'Inspeção local e somente leitura de cabeçalhos e partições.'],
+  backup: ['WORKSPACE / BACKUP CATALOG', 'Explore seus arquivos.', 'Indexe uma pasta de backup já extraída, sem upload de jogos ou imagens.'],
   audit: ['WORKSPACE / ACTIVITY LOG', 'Registro de atividades.', 'Consulte alterações registradas no banco SQLite do servidor privado.'],
   roms: ['EMULATION / ROM PLAYER', 'Jogue no navegador.', 'Emulação experimental de ROMs com núcleos externos, independente do ArkOS.'],
   theme: ['STUDIO / THEME EDITOR', 'Personalize cada detalhe.', 'Altere cores, tipografia e aparência com prévia imediata.'],
@@ -80,6 +82,8 @@ function renderInspector() {
       '<div class="notification-box">O visualizador 3D é hospedado pelo Sketchfab e requer conexão com seus servidores. O modelo não pode ser distribuído como parte do repositório sem licença adequada.</div>';
   } else if (state.tab === 'audit') {
     renderAuditPanel(inspector, heading);
+  } else if (state.tab === 'backup') {
+    renderBackupPanel(inspector, heading, showToast);
   } else if (state.tab === 'firmware') {
     renderFirmwarePanel(inspector, heading, showToast);
   } else if (state.tab === 'roms') {
