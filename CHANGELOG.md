@@ -1,5 +1,15 @@
 # Changelog
 
+## [0.8.0] — 2026-11-01
+
+- Clickable L1, L2, R1 and R2 shoulder controls outside the front photo, with keyboard Q/E/Z/C and standard Gamepad indices 4–7.
+- Browser-local ZIP importer with source-type inventory, safe-path validation, 32 MB ZIP limit and 16 MB uncompressed cap.
+- File explorer and HTML entry selector for imported projects; project and theme previews update immediately.
+- Optional sandboxed browser JS runner with opaque origin, isolated per-route CSP and no outbound network access; suitable for testing self-contained web frontends, not Linux ARM applications.
+- Keeps Cloudflare Access authentication, D1 audit events and local-only project file handling.
+- ArkOS firmware / RK3326 peripherals are **not** emulated; real integration needs original files and a separate runner or hardware target.
+
+
 ## [0.7.0] — 2026-11-01
 
 - Created persistent GitHub source folders for the two historic community projects.
