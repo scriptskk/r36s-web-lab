@@ -13,8 +13,8 @@ const screen = $('screenContent');
 const inspector = $('inspectorContent');
 const tabs = {
   simulator: ['SIMULATOR / LIVE PREVIEW', 'Seu R36S, no navegador.', 'Explore a interface e teste mudanças sem alterar o aparelho.'],
-  slot: ['COMMUNITY / SLOT36S', 'SLOT36S — catálogo visual.', 'Referência histórica do cartucho e edição de interface na tela do R36S.'],
-  pkforge: ['COMMUNITY / PKFORGE R36S', 'PKForge R36S — workspace.', 'Pasta versionada no GitHub e prévia temporária, aguardando os arquivos originais.'],
+  slot: ['COMMUNITY / SLOT36S', 'SLOT36S — catálogo de mídias.', 'Prévia de cartuchos e edição da interface diretamente na tela do R36S.'],
+  pkforge: ['COMMUNITY / POKEFORGE R36S', 'PokeForge R36S — testes de interface.', 'Importe o ZIP v1.6 para visualizar os menus do aplicativo Go/ARM no console.'],
   projects: ['COMMUNITY / PROJECT DIRECTORY', 'Projetos da comunidade.', 'Um espaço organizado para os nossos projetos, experiências e futuras implementações.'],
   viewer: ['DEVICE / 3D MODEL', 'O R36S em três dimensões.', 'Inspecione o modelo rotativo criado por Moh1993 no Sketchfab.'],
   firmware: ['FIRMWARE / DISK INSPECTOR', 'Analise imagens do ArkOS.', 'Inspeção local e somente leitura de cabeçalhos e partições.'],
@@ -91,7 +91,7 @@ function renderInspector() {
       ).join('')+'</div>'+
       '<div class="inspector-card"><div class="card-heading">IMPLEMENTAÇÕES <span class="card-kicker">ROADMAP</span></div>'+
       '<div class="metric-line"><span>Slot.R36S</span><strong>Workspace visual</strong></div>'+
-      '<div class="metric-line"><span>PKForge R36S</span><strong>Workspace visual</strong></div>'+
+      '<div class="metric-line"><span>PokeForge R36S</span><strong>Adaptador Go/ARM</strong></div>'+
       '<div class="metric-line"><span>Execução ArkOS</span><strong>Não implementada</strong></div></div>'+
       '<div class="notification-box">As pastas organizam ferramentas de prévia e desenvolvimento. Execução de firmware RK3326 e integração com projetos nativos dependem dos arquivos reais e de um ambiente compatível.</div>';
     inspector.querySelectorAll('[data-open-project]').forEach(button=>button.addEventListener('click',()=>setTab(button.dataset.openProject)));
