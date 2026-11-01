@@ -4,6 +4,7 @@ import {renderFirmwarePanel} from './firmware-ui.js';
 import {renderBackupPanel} from './backup-ui.js';
 import {R36S_REFERENCE} from './hardware.js';
 import {renderProjectPanel,projectPreview,fitProjectFrame} from './project-lab-ui.js';
+import {PROJECTS} from './project-lab.js';
 import {auditAction,renderAuditPanel} from './audit.js';
 
 const $ = id => document.getElementById(id);
@@ -14,6 +15,7 @@ const tabs = {
   simulator: ['SIMULATOR / LIVE PREVIEW', 'Seu R36S, no navegador.', 'Explore a interface e teste mudanças sem alterar o aparelho.'],
   slot: ['PROJECTS / SLOT.R36S', 'Slot.R36S — prévia ao vivo.', 'Importe os arquivos reais do projeto para testar visuais dentro da tela de 640 × 480.'],
   pkforge: ['PROJECTS / PKFORGE R36S', 'PKForge R36S — prévia ao vivo.', 'Importe os arquivos reais e acompanhe alterações de HTML/CSS imediatamente.'],
+  projects: ['COMMUNITY / PROJECT DIRECTORY', 'Projetos da comunidade.', 'Um espaço organizado para os nossos projetos, experiências e futuras implementações.'],
   viewer: ['DEVICE / 3D MODEL', 'O R36S em três dimensões.', 'Inspecione o modelo rotativo criado por Moh1993 no Sketchfab.'],
   firmware: ['FIRMWARE / DISK INSPECTOR', 'Analise imagens do ArkOS.', 'Inspeção local e somente leitura de cabeçalhos e partições.'],
   backup: ['WORKSPACE / BACKUP CATALOG', 'Explore seus arquivos.', 'Indexe uma pasta de backup já extraída, sem upload de jogos ou imagens.'],
@@ -79,6 +81,20 @@ function renderInspector() {
   const heading = (title, description) => `<h2>${title}</h2><p class="panel-description">${description}</p>`;
   if (state.tab === 'simulator') {
     inspector.innerHTML = heading('Controles do dispositivo','Os botões do console, o teclado e controles USB/Bluetooth conectados ao navegador controlam esta prévia.') + `<div class="inspector-card"><div class="card-heading">MAPEAMENTO <span class="card-kicker">KEYBOARD</span></div><div class="metric-line"><span>Navegar</span><strong><span class="keychip">↑</span> <span class="keychip">↓</span> <span class="keychip">←</span> <span class="keychip">→</span></strong></div><div class="metric-line"><span>Selecionar</span><strong><span class="keychip">ENTER</span></strong></div><div class="metric-line"><span>Voltar</span><strong><span class="keychip">ESC</span></strong></div><div class="metric-line"><span>Menu principal</span><strong><span class="keychip">M</span></strong></div></div><div class="inspector-card"><div class="card-heading">SESSÃO <span class="counter-pill">SIMULADA</span></div><div class="metric-line"><span>Front-end de referência</span><strong>EmulationStation</strong></div><div class="metric-line"><span>Resolução visual</span><strong>640 × 480 · 4:3</strong></div><div class="metric-line"><span>Sistema selecionado</span><strong id="currentSystemLabel">${escapeHTML(selectedSystem().short)}</strong></div><div class="metric-line"><span>Jogos cadastrados</span><strong id="currentGameCount">${activeGames().length}</strong></div></div><div class="notification-box">Esta prévia reproduz interações de interface. Ela não inicializa o ArkOS nem executa jogos.</div>`;
+  } else if (state.tab === 'projects') {
+    inspector.innerHTML = heading('Projetos da comunidade','Escolha uma pasta para continuar o desenvolvimento. Os projetos originais não foram copiados automaticamente; importe seus arquivos nos respectivos workspaces.')+
+      '<div class="project-folder-grid">'+PROJECTS.map(project =>
+        '<button class="project-folder-card" type="button" data-open-project="'+escapeHTML(project.id)+'">'+
+        '<span class="project-folder-icon" aria-hidden="true">▱</span>'+
+        '<span class="project-folder-body"><strong>'+escapeHTML(project.label)+'</strong><small>'+escapeHTML(project.description)+'</small></span>'+
+        '<span class="project-folder-open" aria-hidden="true">›</span></button>'
+      ).join('')+'</div>'+
+      '<div class="inspector-card"><div class="card-heading">IMPLEMENTAÇÕES <span class="card-kicker">ROADMAP</span></div>'+
+      '<div class="metric-line"><span>Slot.R36S</span><strong>Workspace visual</strong></div>'+
+      '<div class="metric-line"><span>PKForge R36S</span><strong>Workspace visual</strong></div>'+
+      '<div class="metric-line"><span>Execução ArkOS</span><strong>Não implementada</strong></div></div>'+
+      '<div class="notification-box">As pastas organizam ferramentas de prévia e desenvolvimento. Execução de firmware RK3326 e integração com projetos nativos dependem dos arquivos reais e de um ambiente compatível.</div>';
+    inspector.querySelectorAll('[data-open-project]').forEach(button=>button.addEventListener('click',()=>setTab(button.dataset.openProject)));
   } else if (state.tab === 'slot' || state.tab === 'pkforge') {
     renderProjectPanel(inspector,heading,showToast,state.tab);
   } else if (state.tab === 'viewer') {
@@ -142,8 +158,16 @@ function confirmSelection() {
 }
 function back() {state.view=state.view==='games'?'systems':state.view==='menu'?'systems':'systems';renderScreen();if(state.tab==='simulator')renderInspector();}
 function act(control) {if(state.tab==='slot'||state.tab==='pkforge'){showToast('Controles do R36S ainda não ligados aos arquivos HTML importados.');return;}if(control==='up'||control==='down'||control==='left'||control==='right')navigate(control);else if(control==='confirm')confirmSelection();else if(control==='back')back();else if(control==='menu'){state.view=state.view==='menu'?'systems':'menu';state.menuIndex=0;renderScreen();}}
+function setProjectFolder(open) {
+  const folder=$('projectFolderToggle'),contents=$('projectFolderContents');
+  if(!folder||!contents)return;
+  const expanded=!!open;
+  folder.setAttribute('aria-expanded',String(expanded));
+  contents.hidden=!expanded;
+}
 function setTab(tab) {
   if(!tabs[tab])return;
+  if(tab==='projects'||tab==='slot'||tab==='pkforge')setProjectFolder(true);
   const previousTab = state.tab;
   state.tab=tab;
   if(tab==='viewer'&&previousTab!=='viewer')auditAction('model_opened',{section:'Modelo 3D'});
@@ -165,7 +189,12 @@ function setTab(tab) {
 }
 
 // UI interaction
-for(const b of document.querySelectorAll('[data-tab]')) b.addEventListener('click',()=>setTab(b.dataset.tab));
+for(const b of document.querySelectorAll('[data-tab]')) b.addEventListener('click',()=>{
+  if(b.dataset.tab==='projects'&&state.tab==='projects'){
+    const expanded=$('projectFolderToggle')?.getAttribute('aria-expanded')==='true';
+    setProjectFolder(!expanded);
+  }else setTab(b.dataset.tab);
+});
 for(const b of document.querySelectorAll('[data-control]'))b.addEventListener('click',()=>act(b.dataset.control));
 $('backupButton').addEventListener('click',()=>{exportSnapshot(state.theme,state.library,selectedSystem().id);auditAction('snapshot_exported',{section:'Projeto'});showToast('Projeto exportado em JSON.');});
 $('gamelistFile').addEventListener('change',async event=>{
