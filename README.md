@@ -1,5 +1,8 @@
 # R36S Web Lab
 
+**v0.6 — R36S PHOTO EDITION:** serious monochrome black/white interface (with page light/dark toggle), native image of the R36S provided for this project, interactive 640x480 screen overlaid on that image, touch/click hotspots aligned to photographed controls and community project folders. Removed colored blue containers from the page. Pixel-like micro-labels are used sparingly. [Visual redesign details](docs/MONOCHROME_REDESIGN.md).
+
+
 **v0.5 — Premium interface:** clean dark/light appearance selector, organized Console/Laboratório/Comunidade navigation, and a dedicated expandable community project folder with Slot.R36S and PKForge R36S. The navigable 2D R36S now has the front speaker, FN button, staggered ABXY keys and dual analog sticks arranged closer to the physical console. [UI guide](docs/PREMIUM_UI.md). No real ArkOS boot is claimed.
 
 
