@@ -1,0 +1,14 @@
+body{font-family:ui-monospace,"Courier New",monospace;background:#090909;color:#ededed}
+.pk-stage{width:640px;height:480px;display:flex;flex-direction:column;background:#090909;padding:22px 28px}
+.pk-head{display:flex;justify-content:space-between;align-items:center;letter-spacing:2px;font-size:11px;padding-bottom:13px;border-bottom:1px solid #555;font-weight:800}
+.pk-head i{font-style:normal;font-weight:400;color:#aaa}
+.pk-head span:last-child{font-size:9px;font-weight:400;color:#8e8e8e}
+.pk-center{display:flex;flex-direction:column;align-items:center;text-align:center;justify-content:center;flex:1;padding:15px 50px}
+.pk-mark{height:76px;width:76px;display:grid;place-items:center;background:#f1f1f1;color:#090909;border-radius:7px;font-size:32px;font-weight:900;letter-spacing:-4px}
+.pk-overline{font-size:10px;letter-spacing:1px;color:#a0a0a0;margin:22px 0 5px}
+.pk-center h1{font-size:28px;letter-spacing:-1px;margin:7px 0}
+.pk-description{font-size:12px;line-height:1.65;color:#afafaf;max-width:460px}
+.pk-links{display:flex;flex-direction:column;gap:4px}
+.lab-entry{border:1px solid #414141;padding:11px 14px;display:flex;justify-content:space-between;font-size:11px;color:#c3c3c3}
+.lab-entry[data-active="true"]{background:#f4f4f4;color:#131313;border-color:#fff}
+.pk-foot{margin-top:11px;text-align:right;font-size:9px;letter-spacing:1px;color:#777}
