@@ -13,7 +13,7 @@
   <body>
     <header class="topbar">
       <div class="brand"><span class="brand-mark">R<span>36</span>S</span><span class="brand-separator"></span><strong>WEB LAB</strong></div>
-      <span class="release">OPEN SOURCE <span class="release-dot"></span> 0.3.0</span>
+      <span class="release">OPEN SOURCE <span class="release-dot"></span> 0.4.0</span>
       <div class="top-actions"><span class="top-note">AMBIENTE LOCAL · SEM BACKEND</span><button id="backupButton" class="top-button" type="button">Exportar projeto <span aria-hidden="true">↗</span></button></div>
     </header>
 
@@ -22,6 +22,8 @@
         <div class="section-label">WORKSPACE</div>
         <nav class="nav-items" aria-label="Seções">
           <button class="nav-item selected" type="button" data-tab="simulator"><span class="nav-symbol">▣</span> Simulador <span class="nav-arrow">›</span></button>
+          <button class="nav-item" type="button" data-tab="slot"><span class="nav-symbol">▧</span> Slot.R36S <span class="nav-arrow">›</span></button>
+          <button class="nav-item" type="button" data-tab="pkforge"><span class="nav-symbol">◇</span> PKForge R36S <span class="nav-arrow">›</span></button>
           <button class="nav-item" type="button" data-tab="viewer"><span class="nav-symbol">◇</span> Modelo 3D <span class="nav-arrow">›</span></button>
           <button class="nav-item" type="button" data-tab="firmware"><span class="nav-symbol">▦</span> Firmware Lab <span class="nav-arrow">›</span></button>
           <button class="nav-item" type="button" data-tab="backup"><span class="nav-symbol">◫</span> Backup <span class="nav-arrow">›</span></button>
@@ -55,6 +57,7 @@
                   <div class="console-screen" id="consoleScreen" tabindex="0" aria-label="Tela do simulador. Use as setas e Enter para navegar.">
                     <div class="screen-glow"></div>
                     <div class="screen-content" id="screenContent"></div>
+                    <iframe id="projectPreviewFrame" class="project-preview-frame" sandbox="" referrerpolicy="no-referrer" title="Prévia HTML/CSS isolada, sem execução de scripts" hidden></iframe>
                     <div class="screen-glass"></div>
                   </div>
                   <span class="screen-below">GAME CONSOLE</span>
@@ -91,7 +94,7 @@
             <div id="inspectorContent"></div>
           </aside>
         </div>
-        <footer class="workspace-footer"><span>R36S WEB LAB — LABORATÓRIO EXPERIMENTAL</span><span>O ArkOS não é inicializado. ROM Player utiliza emuladores externos sob demanda.</span></footer>
+        <footer class="workspace-footer"><span>R36S WEB LAB — LABORATÓRIO EXPERIMENTAL</span><span>Prévia de frontend ao vivo · ArkOS e hardware RK3326 não são emulados.</span></footer>
       </main>
     </div>
     <div id="toast" class="toast" role="status" aria-live="polite"></div>
