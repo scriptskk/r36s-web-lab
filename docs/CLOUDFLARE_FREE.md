@@ -2,7 +2,7 @@
 
 This option uses Cloudflare Workers, Access and D1. The source code stays public on GitHub. Only the administrator can access the deployed application after completing configuration.
 
-**Status:** The Cloudflare code is prepared, but no deployment has been made. It deliberately refuses requests without its Access configuration. A Cloudflare account and authorization are needed.
+**Deployment:** The main repository is connected to a Cloudflare Worker. New forks and installations must configure their own account, Access policy, D1 database and secrets. The Worker rejects requests if the required authentication settings are absent.
 
 ## Free-tier considerations
 
@@ -20,7 +20,7 @@ Go to https://dash.cloudflare.com/ and create an account with 2FA. Enable Zero T
 
 Open Workers & Pages → D1 SQL Database and create a database named r36s-web-lab.
 
-Copy its database UUID and replace the placeholder REPLACE_WITH_YOUR_D1_DATABASE_UUID in the repository's wrangler.jsonc. The UUID is an identifier, not a password.
+Copy the database UUID and set the corresponding `database_id` in your copy of `wrangler.jsonc`. Use your own D1 database when deploying a fork; an existing repository configuration may point to the original installation. The UUID is an identifier, not a password.
 
 Execute the contents of cloudflare/schema.sql in the Cloudflare D1 SQL console, or from an authenticated local checkout:
 
@@ -32,7 +32,7 @@ The existing D1 database must be retained across redeploys so logs remain availa
 
 ## 3 — GitHub integration
 
-In Workers & Pages → Create application → GitHub, grant access only to scriptskk/r36s-web-lab. Choose main. The Worker name must be r36s-web-lab-private (same as in wrangler.jsonc).
+In Workers & Pages → Create application → GitHub, authorize the repository you intend to deploy and select its `main` branch. Choose a Worker name that matches the `name` setting in your `wrangler.jsonc`.
 
 Build command: npm run build:cloudflare
 
@@ -74,7 +74,7 @@ Enter secrets directly into the Cloudflare dashboard. Never commit credentials t
 5. Trigger a new deployment by pushing a change to main. Verify the D1 log persisted across the deployment.
 6. Confirm any old GitHub Pages publication was manually disabled (deleting pages.yml does not unpublish an existing site).
 
-No production deployment has been verified yet. Do not upload personal files until these checks pass.
+For a new installation, complete every verification step before importing private files. Successful CI tests alone do not prove that Access policies or environment secrets are configured correctly.
 
 ## Design and limits
 
