@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="dark">
+<title>ROM Player — R36S Web Lab</title>
+<link rel="stylesheet" href="./rom-player.css">
+<script type="module" src="./src/rom-player.js"></script>
+</head>
+<body>
+<main class="player-app">
+<section id="setup" class="player-setup">
+<p class="label">BROWSER CORE / EXPERIMENTAL</p>
+<h1>Reproduzir uma ROM</h1>
+<p>Execute arquivos de jogos compatíveis no navegador usando o EmulatorJS. Isto não inicializa o ArkOS nem emula o hardware do R36S.</p>
+<label for="system">Plataforma</label>
+<select id="system">
+<option value="nes">Nintendo / NES (.nes)</option>
+<option value="snes">Super Nintendo (.sfc, .smc)</option>
+<option value="gb">Game Boy / Color (.gb, .gbc)</option>
+<option value="gba">Game Boy Advance (.gba)</option>
+<option value="psx">PlayStation 1 (.chd, .pbp, .bin, .iso, .img — experimental)</option>
+</select>
+<label for="rom">ROM ou imagem de jogo</label>
+<input id="rom" type="file" accept=".nes,.sfc,.smc,.gb,.gbc,.gba,.chd,.pbp,.bin,.iso,.img" />
+<label for="bios">BIOS própria (opcional, pode ser necessária para PS1)</label>
+<input id="bios" type="file" accept=".bin,.rom,.bios" />
+<button id="launch" type="button">Iniciar emulador</button>
+<p id="message" role="status" aria-live="polite">Escolha uma ROM que você tem direito de utilizar. Nenhum jogo ou BIOS é fornecido.</p>
+<small>Ao iniciar, o navegador buscará componentes do EmulatorJS em cdn.emulatorjs.org. Seus arquivos são selecionados localmente e não são enviados pelo código do Web Lab. O código de terceiros opera no navegador. Compatibilidade e desempenho variam.</small>
+</section>
+<section id="playback" hidden>
+<div class="player-header"><span>ROM PLAYER · EMULATORJS</span><button id="reset" type="button">Sair / trocar arquivo</button></div>
+<p id="running" role="status" aria-live="polite">Inicializando...</p>
+<div id="game"></div>
+</section>
+</main>
+</body></html>
