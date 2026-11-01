@@ -24,7 +24,8 @@ DATA_DIR = Path(os.environ.get("R36S_DATA_DIR", str(Path.home() / ".local/share/
 ALLOWED_EVENTS = {
     "theme_updated", "theme_exported", "theme_reset", "gamelist_imported",
     "library_reset", "snapshot_exported", "firmware_inspected", "rom_launch_requested",
-    "model_opened", "backup_indexed"
+    "model_opened", "backup_indexed",
+    "project_imported", "project_preview_updated", "project_exported"
 }
 ALLOWED_STATIC = {"index.html", "styles.css", "rom-player.html", "rom-player.css", "assets/icon.svg"}
 LOGIN_HTML = """<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>R36S Web Lab · Acesso privado</title>
