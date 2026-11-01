@@ -1,5 +1,5 @@
-import {createRemoteJWKSet, jwtVerify} from "jose";
-import {configurationIssues, normalizeTeamDomain} from "./config.js";
+import {configurationIssues} from "./config.js";
+import {verifyAccess} from "./access.js";
 
 const ALLOWED_ACTIONS = new Set([
   "theme_updated","theme_exported","theme_reset","gamelist_imported",
@@ -9,12 +9,6 @@ const ALLOWED_ACTIONS = new Set([
 const META_STRINGS = new Set(["system","format","section"]);
 const META_NUMBERS = new Set(["count","size_bytes"]);
 const enc=new TextEncoder();
-const jwksCache=new Map();
-function getKeys(issuer){
-  if(!jwksCache.has(issuer))jwksCache.set(issuer,createRemoteJWKSet(new URL(issuer+"/cdn-cgi/access/certs")));
-  return jwksCache.get(issuer);
-}
-
 const json=(value,status=200)=>new Response(JSON.stringify(value), {
   status,
   headers:{
@@ -27,23 +21,6 @@ const json=(value,status=200)=>new Response(JSON.stringify(value), {
   }
 });
 
-// The built-in Worker static assets router does not propagate ctx.access.
-// We validate the signed Access JWT on EVERY request including static assets.
-async function accessIdentity(request,env){
-  const token=request.headers.get("cf-access-jwt-assertion");
-  if(!token) return null;
-  const issuer=normalizeTeamDomain(env.TEAM_DOMAIN);
-  const jwks=getKeys(issuer);
-  try{
-    const {payload,protectedHeader}=await jwtVerify(token,jwks,{
-      issuer,audience:env.POLICY_AUD,algorithms:["RS256"]
-    });
-    if(protectedHeader.alg!=="RS256")return null;
-    const email=typeof payload.email==="string" ? payload.email.trim().toLowerCase() : "";
-    if(!email || email!==env.ADMIN_EMAIL.toLowerCase().trim())return null;
-    return {email,sub:String(payload.sub||email)};
-  }catch{return null;}
-}
 async function sign(env,message) {
   const key=await crypto.subtle.importKey("raw",enc.encode(env.CSRF_SECRET),"HMAC",false,["sign"]);
   const bytes=new Uint8Array(await crypto.subtle.sign("HMAC",key,enc.encode(message)));
@@ -79,11 +56,15 @@ function metadata(details){
 }
 
 export default {
-  async fetch(request,env){
+  async fetch(request,env,ctx){
     const issues=configurationIssues(env);
     if(issues.length)return json({error:"Instância não configurada.",verificar:issues},503);
-    const identity=await accessIdentity(request,env);
-    if(!identity)return json({error:"Acesso negado. Faça login pelo Cloudflare Access."},403);
+    const access=await verifyAccess(request,env,ctx);
+    if(!access.identity)return json({
+      error:"Acesso negado. Faça login pelo Cloudflare Access.",
+      diagnostico:access.reason
+    },403);
+    const identity=access.identity;
     const {pathname}=new URL(request.url);
     try{
       if(pathname==="/api/session" && request.method==="GET"){
