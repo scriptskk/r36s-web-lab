@@ -20,7 +20,7 @@ async function walk(folder, prefix=""){
   }
 }
 await walk(output);
-const expected=["index.html","styles.css","premium.css","monochrome.css","src/app.js","src/site-theme.js","src/audit.js","src/firmware.js","src/backup.js","src/community-loader.js","community/catalog.json","community/slot36s/preview.html","community/pkforge-r36s/preview.html"];
+const expected=["index.html","styles.css","premium.css","monochrome.css","src/app.js","src/site-theme.js","src/audit.js","src/firmware.js","src/backup.js","src/community-loader.js","community/catalog.json","community/slot36s/preview.html","community/slot36s/assets/cartucho-historico.webp","community/pkforge-r36s/preview.html"];
 for(const filename of expected)if(!files.includes(filename))throw Error("Missing asset: "+filename);
 if(files.some(f=>f.includes(".env")||f.endsWith(".db")||f.endsWith(".sqlite3")||f.startsWith("private_server/")))throw Error("Unexpected private asset");
 console.log("Cloudflare asset bundle created:",files.length,"files.");
