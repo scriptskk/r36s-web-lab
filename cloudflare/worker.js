@@ -4,7 +4,8 @@ import {verifyAccess} from "./access.js";
 const ALLOWED_ACTIONS = new Set([
   "theme_updated","theme_exported","theme_reset","gamelist_imported",
   "library_reset","snapshot_exported","firmware_inspected",
-  "rom_launch_requested","model_opened","backup_indexed"
+  "rom_launch_requested","model_opened","backup_indexed",
+  "project_imported","project_preview_updated","project_exported"
 ]);
 const META_STRINGS = new Set(["system","format","section"]);
 const META_NUMBERS = new Set(["count","size_bytes"]);
