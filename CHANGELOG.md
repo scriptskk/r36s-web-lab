@@ -1,5 +1,15 @@
 # Changelog
 
+## [0.6.0] — 2026-11-01
+
+- Replaced the illustrated 2D chassis with the actual transparent R36S photo supplied for this laboratory, optimized to WebP.
+- The 4:3 console screen is live over the display area on the image. Navigation via keyboard, gamepad and screen entries remains; transparent control hotspots overlay the photographed physical buttons.
+- New black/white editorial appearance and simplified cards, navigation, page hierarchy and restrained pixel-style micro typography.
+- Page light/dark mode remains available, independent from Theme Studio. Default simulator accent and systems palette now start in neutral grayscale.
+- Updated both Cloudflare static assets and optional Flask allowlist and added regression tests.
+- **Limits:** precise button hit targets and visual sizing require browser inspection; 3D Sketchfab remains separate. Firmware, ArkOS boot and RK3326 hardware are not emulated.
+
+
 ## [0.5.0] — 2026-11-01
 
 - Premium, responsive page shell and separate light/dark appearance stored locally.
