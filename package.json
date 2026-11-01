@@ -1,7 +1,7 @@
 {
   "name": "r36s-web-lab",
   "private": true,
-  "version": "0.9.0",
+  "version": "0.9.1",
   "type": "module",
   "description": "Browser-based R36S interface simulator and theme lab",
   "scripts": {
