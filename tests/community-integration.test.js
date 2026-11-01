@@ -3,12 +3,14 @@ import assert from "node:assert/strict";
 import {readFileSync,statSync} from "node:fs";
 import {PROJECTS} from "../src/project-lab.js";
 const read=path=>readFileSync(path,"utf8");
-test("historical Slot and PKForge projects are named, versioned, and distinguished",()=>{
+test("community catalog lists current workspaces and truthful execution modes",()=>{
   const db=JSON.parse(read("community/catalog.json"));
   assert.deepEqual(db.projects.map(x=>x.id),["slot","pkforge"]);
-  assert.equal(db.projects[0].sourceVerified,false);
-  assert.equal(db.projects[1].status,"placeholder");
+  assert.equal(db.projects[0].status,"web-preview");
+  assert.equal(db.projects[1].status,"native-zip-adapter");
+  assert.ok(db.projects.every(p=>p.originalCodeIncluded===false));
   assert.deepEqual(PROJECTS.map(x=>x.id),["slot","pkforge"]);
+  assert.match(PROJECTS[1].description,/Go\/ARM/);
 });
 test("Slot displays a recovered cartridge image and physical navigation entries",()=>{
   const page=read("community/slot36s/preview.html");
