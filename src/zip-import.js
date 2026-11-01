@@ -6,7 +6,8 @@
  */
 import {cleanPath,fileCategory,MAX_FILES,MAX_TOTAL_BYTES,MAX_TEXT_BYTES,MAX_IMAGE_BYTES} from "./project-lab.js";
 export const MAX_ZIP_BYTES=32*1024*1024;
-const MAX_CENTRAL_ENTRIES=500;
+const MAX_CENTRAL_ENTRIES=20000;
+const SKIP_FOLDERS=new Set(["node_modules",".git",".venv","venv","__pycache__",".next",".nuxt",".turbo",".cache"]);
 const dv=(b)=>new DataView(b.buffer,b.byteOffset,b.byteLength);
 function need(b,pos,n){if(pos<0||n<0||pos+n>b.length)throw Error("Arquivo ZIP incompleto ou inválido.");}
 function mime(path){
@@ -50,6 +51,11 @@ export function getZipEntries(bytes){
     if(!path)throw Error("O ZIP contém um caminho inseguro.");
     if(seen.has(path))throw Error("O ZIP contém nomes de arquivos duplicados.");
     seen.add(path);
+    // Exclude dependency trees and caches: a real React/Node ZIP can contain
+    // thousands of vendor files, but they must never execute in the browser.
+    const segments=path.split("/");
+    if(segments.some(part=>SKIP_FOLDERS.has(part)))continue;
+    if(/^__MACOSX\//i.test(path) || /(^|\/)\.DS_Store$/.test(path))continue;
     // Unix symlinks and arbitrary executables are ignored, never followed.
     if(((external>>>16)&0o170000)===0o120000)continue;
     const category=fileCategory(path);
@@ -90,7 +96,7 @@ export async function unzipSourceFiles(file){
   if(!file||!Number.isFinite(file.size)||file.size>MAX_ZIP_BYTES)throw Error("Selecione um ZIP de até 32 MB.");
   const bytes=new Uint8Array(await file.arrayBuffer());
   const entries=getZipEntries(bytes),view=dv(bytes),files=[];
-  if(!entries.length)throw Error("Nenhum arquivo HTML/CSS/JS/XML/imagem encontrado neste ZIP.");
+  if(!entries.length)throw Error("O ZIP não contém código web ou arquivos de configuração compatíveis. Se for ArkOS (.img), ROMs, binários Linux ou um pacote só com executáveis, ele não pode ser inicializado pelo visualizador de páginas.");
   for(const entry of entries){
     const p=entry.offset;
     need(bytes,p,30);
@@ -102,6 +108,8 @@ export async function unzipSourceFiles(file){
     const compressed=bytes.subarray(dataStart,dataStart+entry.compressed);
     const data=entry.method===0?compressed:await inflateRawLimited(compressed,entry.uncompressed);
     if(data.length!==entry.uncompressed)throw Error("Tamanho descompactado inconsistente: "+entry.path);
+    // Preserve the path relative to the ZIP root in the File name, so
+    // projectManifest and the asset resolver can find nested HTML/CSS/JS.
     files.push(new File([data],entry.path,{type:entry.mime}));
   }
   return files;
