@@ -22,10 +22,16 @@ export function isPokeForgeNativeArchive(files){
 }
 export function newPokeForgePreview(catalog=[]){
   const entries=Array.isArray(catalog)?catalog.filter(p=>Number.isInteger(p?.id)&&p.id>0&&p.id<=2000&&typeof p.name==="string").slice(0,2000):[];
-  return {page:0,box:0,selection:0,theme:0,gen:0,detail:false,dialog:"",catalog:entries,previewMode:"native-ui-adapter",version:"v1.6",profile:"PLAYER"};
+  return {page:0,box:0,selection:0,theme:0,gen:0,welcome:true,avatar:0,detail:false,dialog:"",catalog:entries,previewMode:"native-ui-adapter",version:"v1.6",profile:"PLAYER"};
 }
 export function pokeForgeControl(state,control){
   if(!state)return false;
+  if(state.welcome){
+    if(control==="confirm"||control==="r2"){state.welcome=false;state.page=0;}
+    else if(control==="up"){state.avatar=(state.avatar+5)%6;}
+    else if(control==="down"){state.avatar=(state.avatar+1)%6;}
+    return true;
+  }
   if(state.detail){
     if(["back","confirm","l2","r2"].includes(control))state.detail=false;
     return true;
@@ -129,6 +135,18 @@ function dex(state){
   return box("POKEDEX / GENERATIONS",content);
 }
 export function renderPokeForgePreview(state){
+  if(state.welcome){
+    const content='<main class="pf-welcome" style="--pf-base:'+COLORS[state.theme][0]+';--pf-mid:'+COLORS[state.theme][1]+';--pf-hot:'+COLORS[state.theme][2]+';--pf-gold:'+COLORS[state.theme][3]+'">'+
+      '<div class="pf-welcome-header">POKEFORGE R36S | SELECT PROFILE</div>'+
+      '<section class="pf-welcome-box"><div class="pf-panel-title">MY PROFILE / OFFLINE</div>'+
+      '<div class="pf-avatar">PLAYER<br>0'+(state.avatar+1)+'</div>'+
+      '<div class="pf-welcome-info"><b>'+e(state.profile)+'</b><p>AVATAR '+(state.avatar+1)+' / 6</p><p>PROFILE 1 / 1</p></div>'+
+      '<div class="pf-welcome-keys">LEFT/RIGHT: PROFILE &nbsp; UP/DOWN: AVATAR</div>'+
+      '<div class="pf-welcome-keys">A: ENTER &nbsp; X: RENAME &nbsp; Y: NEW PROFILE</div>'+
+      '<div class="pf-welcome-keys">B: DELETE EXTRA PROFILE (NOT AVAILABLE HERE)</div>'+
+      '</section><span class="pf-preview-flag">UI ADAPTER · NOT NATIVE EXECUTION</span></main>';
+    return {html:content,css:POKEFORGE_CSS};
+  }
   const contents=[()=>home(state),()=>boxes(state),()=>boxes(state),()=>party(state),trainer,editor,()=>tools(state),()=>dex(state)];
   let main=contents[state.page]?.()||home(state);
   if(state.dialog)main+='<div class="pf-dialog"><b>'+e(state.dialog)+'</b><p>Native ArkOS feature is not executed in the browser.</p><small>B / A: BACK</small></div>';
@@ -142,6 +160,14 @@ export const POKEFORGE_CSS=String.raw`
 *{box-sizing:border-box}html,body{margin:0;width:640px;height:480px;overflow:hidden}
 body{font:13px/1.25 "Courier New",ui-monospace,monospace;background:#142337;color:#fff}
 .pf-root{position:relative;width:640px;height:480px;background:var(--pf-base);color:#fff;overflow:hidden}
+.pf-welcome{position:relative;width:640px;height:480px;background:var(--pf-base);color:#fff;padding:0}
+.pf-welcome-header{height:65px;background:var(--pf-mid);padding:22px 32px;font-size:17px;font-weight:900}
+.pf-welcome-box{position:absolute;left:75px;top:90px;width:490px;height:330px;background:#172b40;border:2px solid var(--pf-hot)}
+.pf-avatar{position:absolute;left:29px;top:47px;width:136px;height:136px;background:#294762;display:grid;place-content:center;text-align:center;font-size:19px;line-height:1.5;color:#fff;border:2px solid var(--pf-hot)}
+.pf-welcome-info{position:absolute;left:197px;top:65px}
+.pf-welcome-info>b{font-size:18px}
+.pf-welcome-info>p{color:#bad3e8;margin-top:18px}
+.pf-welcome-keys{position:relative;top:194px;left:20px;height:29px;font-size:11px;white-space:nowrap}
 .pf-header{position:absolute;top:0;left:0;right:0;height:58px;background:var(--pf-mid);border-bottom:2px solid var(--pf-hot);padding:10px 18px;display:flex;justify-content:space-between;align-items:flex-start}
 .pf-header b{display:block;font-size:19px;font-weight:900;letter-spacing:.05em}
 .pf-header small{display:block;font-size:10px;color:#bed6ee;margin-top:2px}
