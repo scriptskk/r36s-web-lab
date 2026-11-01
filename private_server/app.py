@@ -66,7 +66,7 @@ def bootstrap_admin():
         existing = db.execute("SELECT id FROM admin WHERE id=1").fetchone()
         if existing:
             return False
-        password = os.environ.get("R36S_INITIAL_PASSWORD", "")
+        password = os.environ.pop("R36S_INITIAL_PASSWORD", "")  # Clear runtime copy after bootstrap.
         if len(password) < 20 or len(password) > 512:
             if os.environ.get("R36S_REQUIRE_ADMIN_ON_START") == "1":
                 raise RuntimeError("Defina R36S_INITIAL_PASSWORD (20+ caracteres) no painel privado da hospedagem.")
