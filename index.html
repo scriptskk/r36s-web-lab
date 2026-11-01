@@ -8,30 +8,44 @@
     <title>R36S Web Lab</title>
     <link rel="icon" type="image/svg+xml" href="./assets/icon.svg" />
     <link rel="stylesheet" href="./styles.css" />
+    <link rel="stylesheet" href="./premium.css" />
+    <script defer type="module" src="./src/site-theme.js"></script>
     <script defer type="module" src="./src/app.js"></script>
   </head>
   <body>
     <header class="topbar">
       <div class="brand"><span class="brand-mark">R<span>36</span>S</span><span class="brand-separator"></span><strong>WEB LAB</strong></div>
-      <span class="release">OPEN SOURCE <span class="release-dot"></span> 0.4.0</span>
-      <div class="top-actions"><span class="top-note">AMBIENTE LOCAL · SEM BACKEND</span><button id="backupButton" class="top-button" type="button">Exportar projeto <span aria-hidden="true">↗</span></button></div>
+      <span class="release">OPEN SOURCE <span class="release-dot"></span> 0.5.0</span>
+      <div class="top-actions"><span class="top-note"><span class="top-note-dot"></span> WORKSPACE PRIVADO</span><button id="appearanceToggle" class="appearance-toggle" type="button" aria-label="Alternar modo claro ou escuro" aria-pressed="false"><span id="appearanceIcon" aria-hidden="true">☼</span><span id="appearanceLabel">Modo claro</span></button><button id="backupButton" class="top-button" type="button">Exportar projeto <span aria-hidden="true">↗</span></button></div>
     </header>
 
     <div class="layout">
       <aside class="sidebar" aria-label="Navegação principal">
-        <div class="section-label">WORKSPACE</div>
-        <nav class="nav-items" aria-label="Seções">
-          <button class="nav-item selected" type="button" data-tab="simulator"><span class="nav-symbol">▣</span> Simulador <span class="nav-arrow">›</span></button>
-          <button class="nav-item" type="button" data-tab="slot"><span class="nav-symbol">▧</span> Slot.R36S <span class="nav-arrow">›</span></button>
-          <button class="nav-item" type="button" data-tab="pkforge"><span class="nav-symbol">◇</span> PKForge R36S <span class="nav-arrow">›</span></button>
-          <button class="nav-item" type="button" data-tab="viewer"><span class="nav-symbol">◇</span> Modelo 3D <span class="nav-arrow">›</span></button>
-          <button class="nav-item" type="button" data-tab="firmware"><span class="nav-symbol">▦</span> Firmware Lab <span class="nav-arrow">›</span></button>
-          <button class="nav-item" type="button" data-tab="backup"><span class="nav-symbol">◫</span> Backup <span class="nav-arrow">›</span></button>
-          <button class="nav-item" type="button" data-tab="roms"><span class="nav-symbol">▶</span> ROM Player <span class="nav-arrow">›</span></button>
-          <button class="nav-item" type="button" data-tab="theme"><span class="nav-symbol">◈</span> Theme Studio <span class="nav-arrow">›</span></button>
-          <button class="nav-item" type="button" data-tab="library"><span class="nav-symbol">▤</span> Biblioteca <span class="nav-arrow">›</span></button>
-          <button class="nav-item" type="button" data-tab="hardware"><span class="nav-symbol">⌘</span> Hardware <span class="nav-arrow">›</span></button>
-          <button class="nav-item" type="button" data-tab="audit"><span class="nav-symbol">◷</span> Atividade <span class="nav-arrow">›</span></button>
+        <div class="sidebar-intro"><span class="sidebar-kicker">PAINEL DE CONTROLE</span><strong>Workspace</strong><small>R36S Web Lab</small></div>
+        <nav class="nav-items" aria-label="Navegação">
+          <div class="sidebar-nav-group">
+            <div class="section-label">CONSOLE</div>
+            <button class="nav-item selected" type="button" data-tab="simulator"><span class="nav-symbol">▣</span> Simulador <span class="nav-arrow">›</span></button>
+            <button class="nav-item" type="button" data-tab="viewer"><span class="nav-symbol">◈</span> Modelo 3D <span class="nav-arrow">›</span></button>
+            <button class="nav-item" type="button" data-tab="hardware"><span class="nav-symbol">⌘</span> Hardware <span class="nav-arrow">›</span></button>
+          </div>
+          <div class="sidebar-nav-group">
+            <div class="section-label">LABORATÓRIO</div>
+            <button class="nav-item" type="button" data-tab="theme"><span class="nav-symbol">◐</span> Theme Studio <span class="nav-arrow">›</span></button>
+            <button class="nav-item" type="button" data-tab="library"><span class="nav-symbol">▤</span> Biblioteca <span class="nav-arrow">›</span></button>
+            <button class="nav-item" type="button" data-tab="firmware"><span class="nav-symbol">▦</span> Firmware Lab <span class="nav-arrow">›</span></button>
+            <button class="nav-item" type="button" data-tab="backup"><span class="nav-symbol">◫</span> Backup <span class="nav-arrow">›</span></button>
+            <button class="nav-item" type="button" data-tab="roms"><span class="nav-symbol">▷</span> ROM Player <span class="nav-arrow">›</span></button>
+          </div>
+          <div class="sidebar-nav-group projects-group">
+            <div class="section-label">COMUNIDADE</div>
+            <button class="nav-item nav-folder" type="button" id="projectFolderToggle" data-tab="projects" aria-expanded="false" aria-controls="projectFolderContents"><span class="nav-symbol">▱</span> Projetos da comunidade <span class="folder-chevron" aria-hidden="true">⌄</span></button>
+            <div id="projectFolderContents" class="folder-children" hidden>
+              <button class="nav-item nav-child" type="button" data-tab="slot"><span class="nav-symbol">◉</span> Slot.R36S</button>
+              <button class="nav-item nav-child" type="button" data-tab="pkforge"><span class="nav-symbol">◇</span> PKForge R36S</button>
+            </div>
+            <button class="nav-item" type="button" data-tab="audit"><span class="nav-symbol">◷</span> Atividade <span class="nav-arrow">›</span></button>
+          </div>
         </nav>
         <div class="sidebar-divider"></div>
         <div class="section-label">STATUS DO LABORATÓRIO</div>
@@ -45,7 +59,7 @@
       <main class="workspace">
         <div class="workspace-heading">
           <div><p class="eyebrow" id="sectionEyebrow">SIMULATOR / LIVE PREVIEW</p><h1 id="sectionTitle">Seu R36S, no navegador.</h1><p class="subtitle" id="sectionDescription">Explore a interface e teste mudanças sem alterar o aparelho.</p></div>
-          <div class="heading-pills"><span class="outline-pill"><span class="tiny-green-dot"></span> LIVE</span><span class="outline-pill">640 × 480</span></div>
+          <div class="heading-pills"><span class="outline-pill"><span class="tiny-green-dot"></span> LIVE PREVIEW</span><span class="outline-pill">640 × 480</span></div>
         </div>
         <div class="workspace-grid">
           <section class="device-stage" aria-label="Prévia interativa do R36S">
@@ -60,9 +74,11 @@
                     <iframe id="projectPreviewFrame" class="project-preview-frame" sandbox="" referrerpolicy="no-referrer" title="Prévia HTML/CSS isolada, sem execução de scripts" hidden></iframe>
                     <div class="screen-glass"></div>
                   </div>
-                  <span class="screen-below">GAME CONSOLE</span>
+                  <span class="screen-below">R36S <span aria-hidden="true">·</span> GAME CONSOLE</span>
                 </div>
                 <div class="controls">
+                  <div class="front-speaker" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+                  <button class="function-key" type="button" data-control="menu" aria-label="Botão FN, abrir menu">FN</button>
                   <div class="dpad" aria-label="Direcional">
                     <button class="dpad-up" data-control="up" aria-label="Cima"></button>
                     <button class="dpad-left" data-control="left" aria-label="Esquerda"></button>
@@ -77,7 +93,7 @@
                     <button class="action-key button-b" data-control="back" aria-label="Botão B">B</button>
                   </div>
                   <div class="mid-buttons"><button data-control="back" aria-label="Voltar">SELECT</button><div class="speaker-led"></div><button data-control="menu" aria-label="Abrir menu">START</button></div>
-                  <div class="thumb-row"><button class="thumbstick" data-control="left" aria-label="Analógico esquerdo">L3</button><div class="speaker-grille" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div><button class="thumbstick" data-control="right" aria-label="Analógico direito">R3</button></div>
+                  <div class="thumb-row"><button class="thumbstick" data-control="left" aria-label="Analógico esquerdo">L3</button><button class="thumbstick" data-control="right" aria-label="Analógico direito">R3</button></div>
                 </div>
               </div>
             </div>
