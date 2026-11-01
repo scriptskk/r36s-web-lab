@@ -1,6 +1,7 @@
 import {PROJECTS,projectManifest,preferredFile,previewPage,fileCategory} from "./project-lab.js";
 import {auditAction} from "./audit.js";
 import {getCommunitySource,COMMUNITY_SOURCES} from "./community-loader.js";
+import {unzipSourceFiles} from "./zip-import.js";
 
 const STORAGE="r36s-web-lab:project-drafts:v1";
 const projects=Object.fromEntries(PROJECTS.map(p=>[p.id,{html:"",css:"",assetMap:new Map(),fileCount:0,xmlCount:0,repoLoaded:false,selectedIndex:0,detail:false,edited:false}]));
@@ -181,10 +182,11 @@ export function renderProjectPanel(inspector,heading,showToast,id){
     '<a class="action-button secondary" style="display:block;text-align:center" href="'+source.github+'" target="_blank" rel="noopener noreferrer">Abrir pasta do projeto no GitHub ↗</a>'+
     '<p class="fine-print" id="projectRepoStatus" role="status">Selecione atualizar ou edite o rascunho neste navegador.</p></div>'+
     '<div class="inspector-card"><div class="card-heading">ARQUIVOS DO PROJETO <span class="card-kicker">LOCAL · READ ONLY</span></div>'+
-    '<label for="projectFolder" class="form-label">Importar pasta de frontend (HTML, CSS, imagens)</label><input class="firmware-file" id="projectFolder" type="file" webkitdirectory multiple>'+
-    '<label for="projectFiles" class="form-label project-extra-label">Ou selecionar arquivos individualmente</label><input class="firmware-file" id="projectFiles" type="file" multiple accept=".html,.htm,.css,.xml,.png,.jpg,.jpeg,.gif,.webp">'+
+    '<label for="projectZip" class="form-label">Importar projeto compactado (.zip)</label><input class="firmware-file" id="projectZip" type="file" accept=".zip,application/zip,application/x-zip-compressed">'+
+    '<label for="projectFolder" class="form-label project-extra-label">Ou importar pasta de frontend (HTML, CSS, imagens)</label><input class="firmware-file" id="projectFolder" type="file" webkitdirectory multiple>'+
+    '<label for="projectFiles" class="form-label project-extra-label">Ou selecionar arquivos individualmente</label><input class="firmware-file" id="projectFiles" type="file" multiple accept=".html,.htm,.css,.js,.mjs,.xml,.png,.jpg,.jpeg,.gif,.webp">'+
     '<div class="fine-print" id="projectImportStatus">'+(project.fileCount?project.fileCount+' arquivos nesta sessão.':'Nenhum arquivo importado. Projetos existentes não foram sincronizados automaticamente.')+'</div>'+
-    '<p class="fine-print">O XML de tema pode ser selecionado como referência, mas somente HTML/CSS/imagens são pré-visualizados nesta fase. JS, binários e imagens .img do ArkOS não são executados. Até 16 MB por importação.</p></div>'+
+    '<p class="fine-print">Os arquivos ficam no seu navegador. ZIP até 32 MB, conteúdo até 16 MB. HTML/CSS e imagens criam uma prévia; JavaScript e programas ARM são identificados, mas não executados nesta modalidade segura. Imagens ArkOS .img não são inicializadas.</p></div>'+
     '<div class="inspector-card"><div class="card-heading">EDIÇÃO AO VIVO <span class="card-kicker">640 × 480</span></div>'+
     '<label for="projectHtmlEditor" class="form-label">HTML</label><textarea id="projectHtmlEditor" class="project-editor" rows="6" spellcheck="false" placeholder="Importe o HTML real do projeto ou edite aqui..."></textarea>'+
     '<label for="projectCssEditor" class="form-label project-extra-label">CSS</label><textarea id="projectCssEditor" class="project-editor" rows="6" spellcheck="false" placeholder="Alterações CSS aparecem na tela imediatamente..."></textarea>'+
@@ -249,12 +251,28 @@ export function renderProjectPanel(inspector,heading,showToast,id){
     try{
       const result=await loadFiles(id,event.target.files);
       htmlEditor.value=project.html;cssEditor.value=project.css;
-      indicator.textContent=result.manifest.count+" arquivo(s), "+result.manifest.images+" imagem(ns), "+result.manifest.css+" CSS e "+result.manifest.html+" HTML. "+
+      indicator.textContent=result.manifest.count+" arquivo(s), "+result.manifest.images+" imagem(ns), "+result.manifest.css+" CSS, "+result.manifest.html+" HTML e "+result.manifest.javascript+" JavaScript (não executado). "+
       (result.htmlFound?"Prévia disponível.":"Nenhum HTML encontrado: editor/visualização continuam como rascunho.");
       showToast("Arquivos analisados localmente. Nenhum backup ou ROM foi enviado.");
     }catch(error){indicator.textContent=error.message||"Falha ao ler pasta.";}
   }
   inspector.querySelector("#projectFolder").addEventListener("change",imported);
+  inspector.querySelector("#projectZip").addEventListener("change",async event=>{
+    const zip=event.target.files?.[0];if(!zip)return;
+    const indicator=inspector.querySelector("#projectImportStatus");
+    indicator.textContent="Lendo ZIP localmente e verificando limites...";
+    try{
+      const files=await unzipSourceFiles(zip);
+      const result=await loadFiles(id,files);
+      htmlEditor.value=project.html;cssEditor.value=project.css;
+      indicator.textContent="ZIP importado: "+result.manifest.count+" arquivos compatíveis, "+
+        result.manifest.html+" HTML, "+result.manifest.css+" CSS, "+result.manifest.javascript+
+        " JS identificados (sem execução), "+result.manifest.images+" imagens. "+
+        (result.htmlFound?"Prévia renderizada.":"Nenhum arquivo HTML encontrado.");
+      showToast("ZIP aberto localmente. Arquivos não foram enviados à Cloudflare.");
+    }catch(error){indicator.textContent=error.message||"Falha na leitura do ZIP.";}
+    finally{event.target.value="";}
+  });
   inspector.querySelector("#projectFiles").addEventListener("change",imported);
   inspector.querySelector("#projectExport").addEventListener("click",()=>{
     // Export only the user's sanitized static preview, never a disk image or executable.
