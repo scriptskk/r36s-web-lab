@@ -19,5 +19,13 @@
   "observability": {
     "enabled": false
   },
-  "keep_vars": true
+  "keep_vars": true,
+  "secrets": {
+    "required": [
+      "TEAM_DOMAIN",
+      "POLICY_AUD",
+      "ADMIN_EMAIL",
+      "CSRF_SECRET"
+    ]
+  }
 }
