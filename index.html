@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#0b0e15" />
+    <meta name="description" content="Simulador visual e laboratório de temas para o console portátil R36S." />
+    <title>R36S Web Lab</title>
+    <link rel="icon" type="image/svg+xml" href="./assets/icon.svg" />
+    <link rel="stylesheet" href="./styles.css" />
+    <script defer type="module" src="./src/app.js"></script>
+  </head>
+  <body>
+    <header class="topbar">
+      <div class="brand"><span class="brand-mark">R<span>36</span>S</span><span class="brand-separator"></span><strong>WEB LAB</strong></div>
+      <span class="release">OPEN SOURCE <span class="release-dot"></span> 0.1.0</span>
+      <div class="top-actions"><span class="top-note">AMBIENTE LOCAL · SEM BACKEND</span><button id="backupButton" class="top-button" type="button">Exportar projeto <span aria-hidden="true">↗</span></button></div>
+    </header>
+
+    <div class="layout">
+      <aside class="sidebar" aria-label="Navegação principal">
+        <div class="section-label">WORKSPACE</div>
+        <nav class="nav-items" aria-label="Seções">
+          <button class="nav-item selected" type="button" data-tab="simulator"><span class="nav-symbol">▣</span> Simulador <span class="nav-arrow">›</span></button>
+          <button class="nav-item" type="button" data-tab="theme"><span class="nav-symbol">◈</span> Theme Studio <span class="nav-arrow">›</span></button>
+          <button class="nav-item" type="button" data-tab="library"><span class="nav-symbol">▤</span> Biblioteca <span class="nav-arrow">›</span></button>
+          <button class="nav-item" type="button" data-tab="hardware"><span class="nav-symbol">⌘</span> Hardware <span class="nav-arrow">›</span></button>
+        </nav>
+        <div class="sidebar-divider"></div>
+        <div class="section-label">STATUS DO LABORATÓRIO</div>
+        <div class="status-panel"><span class="online-indicator"></span><div><strong>Simulador ativo</strong><small>Ambiente de demonstração</small></div></div>
+        <div class="sidebar-bottom">
+          <div class="info-box"><span class="micro-label">OBJETIVO</span><p>Experimente interfaces sem modificar seu cartão SD.</p></div>
+          <a href="https://handhelds.wiki/R36S" target="_blank" rel="noopener noreferrer" class="external-link">Documentação da comunidade ↗</a>
+        </div>
+      </aside>
+
+      <main class="workspace">
+        <div class="workspace-heading">
+          <div><p class="eyebrow" id="sectionEyebrow">SIMULATOR / LIVE PREVIEW</p><h1 id="sectionTitle">Seu R36S, no navegador.</h1><p class="subtitle" id="sectionDescription">Explore a interface e teste mudanças sem alterar o aparelho.</p></div>
+          <div class="heading-pills"><span class="outline-pill"><span class="tiny-green-dot"></span> LIVE</span><span class="outline-pill">640 × 480</span></div>
+        </div>
+        <div class="workspace-grid">
+          <section class="device-stage" aria-label="Prévia interativa do R36S">
+            <div class="stage-topline"><span>DEVICE PREVIEW</span><span class="stage-mode">R36S · SIMULATION MODE</span></div>
+            <div class="console-wrap">
+              <div class="console-shell" id="consoleShell">
+                <div class="console-upper">
+                  <div class="bezel-label">R36S</div>
+                  <div class="console-screen" id="consoleScreen" tabindex="0" aria-label="Tela do simulador. Use as setas e Enter para navegar.">
+                    <div class="screen-glow"></div>
+                    <div class="screen-content" id="screenContent"></div>
+                    <div class="screen-glass"></div>
+                  </div>
+                  <span class="screen-below">GAME CONSOLE</span>
+                </div>
+                <div class="controls">
+                  <div class="dpad" aria-label="Direcional">
+                    <button class="dpad-up" data-control="up" aria-label="Cima"></button>
+                    <button class="dpad-left" data-control="left" aria-label="Esquerda"></button>
+                    <div class="dpad-center"></div>
+                    <button class="dpad-right" data-control="right" aria-label="Direita"></button>
+                    <button class="dpad-down" data-control="down" aria-label="Baixo"></button>
+                  </div>
+                  <div class="action-cluster" aria-label="Botões">
+                    <button class="action-key button-x" data-control="back" aria-label="Botão X">X</button>
+                    <button class="action-key button-y" data-control="back" aria-label="Botão Y">Y</button>
+                    <button class="action-key button-a" data-control="confirm" aria-label="Botão A">A</button>
+                    <button class="action-key button-b" data-control="back" aria-label="Botão B">B</button>
+                  </div>
+                  <div class="mid-buttons"><button data-control="back" aria-label="Voltar">SELECT</button><div class="speaker-led"></div><button data-control="menu" aria-label="Abrir menu">START</button></div>
+                  <div class="thumb-row"><button class="thumbstick" data-control="left" aria-label="Analógico esquerdo">L3</button><div class="speaker-grille" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div><button class="thumbstick" data-control="right" aria-label="Analógico direito">R3</button></div>
+                </div>
+              </div>
+            </div>
+            <div class="stage-footer"><span><span class="keyboard-symbol">⌨</span> SETAS · NAVEGAR &nbsp; ENTER · SELECIONAR &nbsp; ESC · VOLTAR</span><span id="gamepadStatus">GAMEPAD: AGUARDANDO</span></div>
+          </section>
+
+          <aside class="inspector" aria-label="Painel de ferramentas">
+            <div class="inspector-top"><span class="micro-label">CONTROL PANEL</span><span class="inspector-code" id="inspectorCode">01 / 04</span></div>
+            <div id="inspectorContent"></div>
+          </aside>
+        </div>
+        <footer class="workspace-footer"><span>R36S WEB LAB — PROTÓTIPO DE INTERFACE</span><span>Não executa firmware, ROMs ou emuladores reais.</span></footer>
+      </main>
+    </div>
+    <div id="toast" class="toast" role="status" aria-live="polite"></div>
+    <input type="file" id="gamelistFile" accept=".xml,text/xml,application/xml" hidden />
+  </body>
+</html>
