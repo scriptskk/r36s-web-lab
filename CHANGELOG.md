@@ -1,5 +1,15 @@
 # Changelog
 
+## [0.9.0] — 2026-11-01
+
+- Implemented a Go/ARM ZIP detector for the real PokeForge R36S v1.6 distribution using its main.go and ArkOS launcher filenames.
+- Added a navigable browser UI adaptation based on the source's real profile start screen and eight main tabs, including BOXES grid, BANK, POKEDEX, and OFFLINE UI notices.
+- Loads the Kanto Pokédex catalog (151 entries) from the user's selected ZIP without uploading it, and correctly shows missing later-generation catalog entries.
+- Maps L1/R1/L2/R2 and A/B/D-pad to the native-like UI workflow.
+- Added tests for archive detection, UI navigation, and Cloudflare asset packaging.
+- This does **not** execute ARM native binaries or emulate ArkOS, framebuffer drivers, trade/save editing, profiles, or audio.
+
+
 ## [0.8.1] — 2026-11-01
 
 - Fixed ZIP import for source archives with large central directories by skipping node_modules and caches.
