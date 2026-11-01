@@ -28,7 +28,7 @@ export function fileCategory(path){
   if(e==="js"||e==="mjs"||e==="cjs")return "javascript";
   if(ACCEPTED_IMAGES.has(e))return "image";
   // Keep source files visible in the archive inventory, but do not execute them.
-  if(new Set(["ts","tsx","jsx","vue","svelte","json","jsonc","py","sh","bash","lua",
+  if(new Set(["ts","tsx","jsx","vue","svelte","json","jsonc","go","mod","sum","py","sh","bash","lua",
     "md","txt","yaml","yml","toml","ini","cfg","conf","svg","scss","sass","less"]).has(e))return "source";
   return "unsupported";
 }
