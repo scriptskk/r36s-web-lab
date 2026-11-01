@@ -1,0 +1,230 @@
+/*
+ * MONO / R36S LAB 0.6
+ * Editorial black-white palette, restrained borders and user-supplied R36S
+ * photo. All hardware hotspots are mapped over the photograph, not repainted.
+ */
+:root {
+  --page:#080808;
+  --panel:#080808;
+  --border:#303030;
+  --muted:#999999;
+  --text:#f3f3f3;
+  --blue:#e6e6e6;
+  --brand:#ffffff;
+  --surface:#101010;
+  --surface-hover:#1a1a1a;
+  --surface-strong:#202020;
+  --surface-soft:#111111;
+  --line:#2c2c2c;
+  --card-shadow:none;
+  --shadow:0 16px 50px #0006;
+}
+html[data-appearance="light"]{
+  --page:#fbfbfa;
+  --panel:#fbfbfa;
+  --border:#d3d3d3;
+  --muted:#686868;
+  --text:#161616;
+  --blue:#202020;
+  --brand:#101010;
+  --surface:#fff;
+  --surface-hover:#ececec;
+  --surface-strong:#ededed;
+  --surface-soft:#f7f7f7;
+  --line:#e0e0e0;
+  --card-shadow:none;
+  --shadow:0 15px 50px #0001;
+}
+html,body{font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif}
+body{background:var(--page)}
+button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible,a:focus-visible{
+  outline:2px solid var(--text);outline-offset:3px}
+.topbar{height:80px;background:var(--page);box-shadow:none;border-bottom:1px solid var(--line)}
+.brand-mark{font-family:ui-monospace,SFMono-Regular,Consolas,monospace;font-size:25px;font-weight:900;letter-spacing:-.1em}
+.brand-mark span{color:var(--text)}
+.brand strong{font-size:11px;font-weight:800;letter-spacing:.22em}
+.release{background:transparent;border:1px solid var(--line);border-radius:4px;
+  font-family:ui-monospace,Menlo,Consolas,monospace;font-weight:700;font-size:9px;letter-spacing:.11em}
+.release-dot{background:var(--text)}
+.top-note{font-family:ui-monospace,Menlo,Consolas,monospace;letter-spacing:.07em}
+.top-note-dot{background:var(--text);box-shadow:none;width:5px;height:5px}
+.appearance-toggle,.top-button{border-radius:5px;background:transparent;color:var(--text);
+  box-shadow:none;border-color:var(--border);font-size:11px;font-weight:750;letter-spacing:.025em}
+.appearance-toggle:hover,.top-button:hover{background:var(--surface-hover);color:var(--text);border-color:var(--text)}
+.layout{grid-template-columns:240px minmax(0,1fr)}
+.sidebar{background:transparent;border-right:1px solid var(--line);padding:30px 18px}
+.sidebar-intro{padding-bottom:26px;border-bottom-color:var(--line)}
+.sidebar-intro strong{font-size:20px;font-weight:730;letter-spacing:-.05em}
+.sidebar-kicker,.section-label,.micro-label,.eyebrow,.inspector-code,.stage-topline,.stage-mode{
+  font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  font-weight:750;letter-spacing:.12em}
+.sidebar-nav-group{gap:3px}
+.nav-items{gap:29px}
+.nav-item{color:var(--muted);border-radius:5px;font-size:12px;font-weight:550}
+.nav-item:hover{color:var(--text);background:var(--surface-hover)}
+.nav-item.selected{color:var(--text);background:var(--surface-strong);border-color:transparent;
+  border-left:2px solid var(--text);border-radius:3px;font-weight:700}
+.nav-item.selected .nav-symbol,.nav-symbol{color:var(--text)}
+.nav-folder{background:transparent;border-color:var(--line);font-weight:650}
+.nav-folder.selected,.nav-folder[aria-expanded="true"]{background:var(--surface-hover);border-color:var(--line)}
+.folder-children{border-left-color:var(--line)}
+.info-box{background:transparent;border:1px solid var(--line);border-radius:6px}
+.info-box p,.external-link{color:var(--muted)}
+.online-indicator,.tiny-green-dot{background:var(--text);box-shadow:none}
+.workspace{max-width:1600px;padding:48px clamp(20px,3.7vw,62px) 30px}
+.workspace-heading{margin-bottom:32px}
+.eyebrow{font-size:10px;color:var(--muted);letter-spacing:.16em}
+.workspace-heading h1{font-size:clamp(29px,2.6vw,42px);line-height:1.15;font-weight:710;letter-spacing:-.055em}
+.subtitle{font-size:13px;line-height:1.65;max-width:650px;color:var(--muted)}
+.heading-pills{gap:8px}
+.outline-pill{border-radius:3px;padding:8px 11px;background:transparent;color:var(--muted);font-size:9px}
+.workspace-grid{grid-template-columns:minmax(365px,1.45fr) minmax(300px,.82fr);
+  gap:0;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+.device-stage,.inspector{background:transparent;box-shadow:none;border:0;border-radius:0}
+.device-stage{min-height:665px}
+.device-stage::before{display:none}
+.stage-topline,.stage-footer{border-color:var(--line);color:var(--muted)}
+.stage-topline{font-size:10px;font-weight:660}
+.stage-mode{color:var(--muted);font-size:9px}
+.stage-footer{font-size:9px;font-family:ui-monospace,Consolas,monospace}
+.inspector{padding:27px 30px 30px;border-left:1px solid var(--line);min-height:605px}
+.inspector-top{border-color:var(--line)}
+.inspector h2{font-size:22px;line-height:1.2;letter-spacing:-.04em;margin-top:26px}
+.panel-description{font-size:12px;line-height:1.7;color:var(--muted)}
+.inspector-card{background:transparent;padding:15px 0 19px;margin-bottom:8px;border:0;
+  border-bottom:1px solid var(--line);border-radius:0}
+.card-heading{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:10px;letter-spacing:.08em}
+.card-kicker{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:9px}
+.metric-line,.library-row{color:var(--muted);font-size:12px}
+.metric-line strong,.library-row b,.hardware-line strong{font-weight:670;color:var(--text)}
+.hardware-line{border-color:var(--line)}
+.hardware-line span{color:var(--muted)}
+.keychip{background:transparent;border-color:var(--line);border-radius:3px;color:var(--text)}
+.form-field>label,.form-label{color:var(--muted)}
+.field-input,.field-select,.project-editor{background:var(--surface);border:1px solid var(--line);
+  color:var(--text);border-radius:5px}
+.firmware-file{background:var(--surface);color:var(--text);border-color:var(--line);border-radius:4px}
+.firmware-file::file-selector-button{border-radius:3px;background:var(--surface-hover);color:var(--text);border-color:var(--line)}
+.color-line input[type=color]{background:var(--surface);border-color:var(--line)}
+.color-line code,.range-line output{color:var(--text)}
+.toggle-line{color:var(--muted)}
+.action-button,.action-button.secondary{background:transparent;color:var(--text);
+  border:1px solid var(--line);border-radius:4px;box-shadow:none;font-size:11px}
+.action-button:hover,.action-button.secondary:hover{background:var(--surface-hover);border-color:var(--text)}
+.notification-box{border:0;border-top:1px solid var(--line);border-radius:0;
+  background:transparent;color:var(--muted);font-size:11px;padding:14px 0}
+.counter-pill{color:var(--text);background:var(--surface-strong)}
+.fine-print,.workspace-footer{color:var(--muted)}
+.project-folder-card{background:transparent;border:1px solid var(--line);border-radius:5px}
+.project-folder-card:hover{background:var(--surface-hover);border-color:var(--text)}
+.project-folder-icon{background:var(--surface-strong);color:var(--text);border-radius:3px}
+.project-folder-open{color:var(--text)}
+.toast{background:var(--page);color:var(--text);border-color:var(--line);border-radius:4px}
+.sketchfab-stage iframe,.rom-stage iframe{border-color:var(--line);border-radius:4px}
+.model-credit,.model-credit a{color:var(--muted)}
+/* A few restrained retro system labels instead of a page-wide pixel font. */
+.brand-mark,.release,.eyebrow,.card-kicker,.screen-overline,.screen-status,.stage-mode{
+  font-family:ui-monospace,"Courier New",monospace}
+/* User-supplied transparent R36S image, cropped proportionally to the actual
+   photographed body (154x240). The CSS console is no longer a drawn shell. */
+.console-wrap{padding:25px 15px;min-height:575px}
+.console-shell{
+  --device-width:310px;
+  position:relative;
+  width:var(--device-width);
+  height:auto;
+  aspect-ratio:154/240;
+  flex:0 0 auto;
+  border:0;
+  border-radius:0;
+  background:none;
+  box-shadow:none;
+  overflow:visible;
+  isolation:isolate;
+}
+.console-shell::before,.console-shell::after{display:none}
+.console-reference-image{position:absolute;inset:0;width:100%;height:100%;
+  object-fit:fill;pointer-events:none;user-select:none;z-index:1;
+  -webkit-user-drag:none;filter:drop-shadow(0 18px 20px #0006)}
+html[data-appearance="light"] .console-reference-image{filter:drop-shadow(0 13px 15px #0003)}
+.console-upper{position:absolute;top:4.3%;left:5%;width:90%;z-index:3;padding:0}
+.bezel-label,.screen-below{display:none}
+.console-screen{width:100%;height:auto;aspect-ratio:4/3;border-radius:2px;
+  border:0;outline:0;background:#0b0b0f;
+  box-shadow:inset 0 0 1px #0007;overflow:hidden;container-type:inline-size}
+.console-screen:focus-visible{outline:1px solid #fff;outline-offset:2px}
+.screen-glow{display:none}
+.screen-glass{background:linear-gradient(135deg,#ffffff0a,transparent 43%);box-shadow:inset 0 0 5px #0006}
+.screen-content{background:#121212;color:#f6f6f6;padding:9px 11px 8px}
+.console-shell .controls{position:absolute;inset:0;width:100%;height:100%;z-index:4;padding:0;pointer-events:none}
+.console-shell .controls :is(button){pointer-events:auto;touch-action:manipulation}
+.console-shell .front-speaker{display:none}
+.console-shell .dpad{left:7%;top:55%;width:23%;height:18%;transform:none}
+.console-shell .dpad button,.console-shell .action-key,.console-shell .function-key,
+.console-shell .mid-buttons button,.console-shell .thumbstick{
+  border:1px solid transparent !important;
+  background:transparent !important;
+  box-shadow:none !important;
+  color:transparent !important;
+  text-shadow:none !important;
+  border-radius:7px;
+  transition:background .12s,outline .12s;
+}
+.console-shell .dpad button::before,.console-shell .mid-buttons button::before{display:none}
+.console-shell .dpad-center{background:transparent;box-shadow:none}
+.console-shell .dpad button:active,.console-shell .action-key:active,
+.console-shell .mid-buttons button:active,.console-shell .thumbstick:active{
+  transform:none;background:#ffffff24 !important}
+.console-shell .controls button:hover{background:#ffffff18 !important;outline:1px solid #ffffff50;outline-offset:0}
+.console-shell .controls button:focus-visible{outline:2px solid #fff;outline-offset:2px}
+.console-shell .dpad-up,.console-shell .dpad-down{left:34%;width:32%;height:35%}
+.console-shell .dpad-up{top:0}.console-shell .dpad-down{top:65%}
+.console-shell .dpad-left,.console-shell .dpad-right{top:34%;height:32%;width:35%}
+.console-shell .dpad-left{left:0}.console-shell .dpad-right{right:0}
+.console-shell .action-cluster{right:4%;top:54%;width:28%;height:19%}
+.console-shell .action-key{width:33%;height:33%;font-size:0}
+.console-shell .button-x{top:0;left:33%}
+.console-shell .button-y{top:33%;left:0}
+.console-shell .button-a{top:33%;right:0}
+.console-shell .button-b{bottom:0;left:33%}
+.console-shell .function-key{top:66%;left:50%;width:9%;height:6%;font-size:0}
+.console-shell .mid-buttons{position:absolute;top:71%;left:33%;right:33%;width:34%;
+  justify-content:space-between;gap:7%}
+.console-shell .mid-buttons button{font-size:0;width:37%;height:25px;padding:0}
+.console-shell .thumb-row{position:absolute;left:4%;right:4%;bottom:8%;width:92%;
+  display:flex;justify-content:space-between;align-items:center}
+.console-shell .thumbstick{width:25%;height:auto;aspect-ratio:1;flex:0 0 auto;font-size:0}
+.console-shell .speaker-led{display:none}
+/* The 640x480 project iframe follows the photo LCD via existing fitProjectFrame(). */
+.project-preview-frame{border-radius:2px}
+@media(max-width:1120px){
+ .layout{grid-template-columns:212px minmax(0,1fr)}
+ .workspace{padding:32px 23px}
+ .workspace-grid{grid-template-columns:minmax(335px,1fr) minmax(280px,.78fr)}
+ .inspector{padding:22px}
+}
+@media(max-width:940px){
+ .layout{grid-template-columns:minmax(0,1fr)}
+ .sidebar{border-right:0;border-bottom:1px solid var(--line);padding:10px 14px}
+ .workspace-grid{grid-template-columns:minmax(0,1fr)}
+ .inspector{border-left:0;border-top:1px solid var(--line)}
+ .device-stage{min-height:630px}
+ .topbar{height:72px}
+}
+@media(max-width:680px){
+ .topbar{height:64px;padding:0 13px}
+ .brand-mark{font-size:22px}
+ .workspace{padding:24px 15px}
+ .workspace-heading h1{font-size:26px}
+ .console-wrap{min-height:525px;padding:17px 4px}
+ .console-shell{--device-width:min(310px,88vw);transform:none}
+ .device-stage{min-height:610px}
+ .stage-footer{font-size:9px}
+}
+@media(max-width:360px){
+ .console-shell{--device-width:270px;transform:none}
+ .console-wrap{min-height:490px}
+}
+@media(prefers-reduced-motion:reduce){
+ .console-shell .controls button,.console-reference-image{transition:none}
+}
