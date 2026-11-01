@@ -2,9 +2,10 @@ import {PROJECTS,projectManifest,preferredFile,previewPage,fileCategory,classify
 import {auditAction} from "./audit.js";
 import {getCommunitySource,COMMUNITY_SOURCES} from "./community-loader.js";
 import {unzipSourceFiles} from "./zip-import.js";
+import {isPokeForgeNativeArchive,newPokeForgePreview,pokeForgeControl,renderPokeForgePreview} from "./pokeforge-native-preview.js";
 
 const STORAGE="r36s-web-lab:project-drafts:v1";
-const projects=Object.fromEntries(PROJECTS.map(p=>[p.id,{html:"",css:"",assetMap:new Map(),fileCount:0,xmlCount:0,localFiles:[],htmlEntries:[],scriptMap:new Map(),runJS:false,repoLoaded:false,selectedIndex:0,detail:false,edited:false}]));
+const projects=Object.fromEntries(PROJECTS.map(p=>[p.id,{html:"",css:"",assetMap:new Map(),fileCount:0,xmlCount:0,localFiles:[],htmlEntries:[],scriptMap:new Map(),runJS:false,nativePreview:null,repoLoaded:false,selectedIndex:0,detail:false,edited:false}]));
 function readDrafts(){
   try{
     const drafts=JSON.parse(localStorage.getItem(STORAGE)||"{}");
@@ -96,7 +97,13 @@ function navigablePreview(html,p){
   return doc.body.innerHTML;
 }
 export function navigateProject(id,control){
-  const p=projects[id];if(!p||!p.html)return false;
+  const p=projects[id];if(!p)return false;
+  if(p.nativePreview){
+    const handled=pokeForgeControl(p.nativePreview,control);
+    if(handled)projectPreview(id);
+    return handled;
+  }
+  if(!p.html)return false;
   if(p.runJS){
     const frame=document.getElementById("projectPreviewFrame");
     frame?.contentWindow?.postMessage({type:"r36s-web-lab-control-v1",control},"*");
@@ -144,6 +151,13 @@ export function projectPreview(id){
   const p=projects[id];if(!p)return;
   const frame=document.getElementById("projectPreviewFrame");
   if(!frame)return;
+  if(p.nativePreview){
+    // Interpret the UI layout from the Go package, not its ARM executable.
+    const screen=renderPokeForgePreview(p.nativePreview);
+    frame.onload=null;frame.setAttribute("sandbox","");frame.removeAttribute("src");
+    frame.srcdoc=previewPage(screen.html,screen.css);
+    return;
+  }
   const entry=p.entry||"index.html";
   const html=p.html.trim()?sandboxHTML(p.html,p.assetMap,entry):placeholder(id);
   const css=sandboxCSS(p.css,p.assetMap,p.cssEntry||entry);
@@ -209,6 +223,19 @@ async function loadFiles(id,files){
   project.assetMap=data;project.scriptMap=scriptMap;project.runJS=false;project.fileCount=manifest.count;project.xmlCount=manifest.files.filter(f=>f.category==="xml").length;
   project.repoLoaded=false;project.detail=false;project.selectedIndex=0;project.edited=true;
   project.html=html;project.css=cssParts.join("\n");
+  project.nativePreview=null;
+  if(id==="pkforge" && isPokeForgeNativeArchive(manifest.files)){
+    const pokedex=manifest.files.find(meta=>/(?:^|\/)pokeforge-r36s\/data\/pokedex\.json$/i.test(meta.path));
+    let entries=[];
+    if(pokedex){
+      try{
+        const raw=await selected[manifest.files.indexOf(pokedex)].text();
+        const parsed=JSON.parse(raw);
+        if(Array.isArray(parsed))entries=parsed;
+      }catch{/* Preserve the offline UI even if the catalog is unavailable. */}
+    }
+    project.nativePreview=newPokeForgePreview(entries);
+  }
   project.localFiles=manifest.files.map((item,i)=>({...item,blob:selected[i]}));
   project.htmlEntries=project.localFiles.filter(item=>item.category==="html");
   project.entry=chosen?.path||"index.html";
@@ -216,7 +243,7 @@ async function loadFiles(id,files){
   saveDrafts();
   projectPreview(id);
   auditAction("project_imported",{section:id,count:manifest.count,size_bytes:manifest.total});
-  return {manifest,htmlFound:!!chosen};
+  return {manifest,htmlFound:!!chosen,nativePreview:!!project.nativePreview,nativeCatalogCount:project.nativePreview?.catalog.length||0};
 }
 export function renderProjectPanel(inspector,heading,showToast,id){
   if(!projects[id])return;
@@ -279,12 +306,14 @@ export function renderProjectPanel(inspector,heading,showToast,id){
     const entry=project.htmlEntries.find(file=>file.path===entrySelect.value);
     if(!entry)return;
     project.entry=entry.path;
+    project.nativePreview=null;
     project.html=await entry.blob.text();
     project.selectedIndex=0;project.detail=false;project.edited=true;
     htmlEditor.value=project.html;saveDrafts();projectPreview(id);
     auditAction("project_preview_updated",{section:id});
   });
   runtimeButton.addEventListener("click",()=>{
+    if(project.nativePreview){status.textContent="O PokeForge deste ZIP é um aplicativo Go/ARM: navegue a adaptação de interface com os botões. JavaScript web não executa /dev/fb0.";return;}
     if(!project.html.trim()){status.textContent="Importe primeiro uma interface HTML.";return;}
     project.runJS=!project.runJS;
     runtimeButton.setAttribute("aria-pressed",String(project.runJS));
@@ -317,7 +346,7 @@ export function renderProjectPanel(inspector,heading,showToast,id){
           }
         }catch{/* The CSS preview still works if the image cannot be read. */}
       }
-      project.repoLoaded=true;project.detail=false;project.selectedIndex=0;project.edited=false;
+      project.repoLoaded=true;project.detail=false;project.selectedIndex=0;project.edited=false;project.nativePreview=null;
       project.runJS=false;project.scriptMap=new Map();
       project.localFiles=[];project.htmlEntries=[];showFileBrowser();
       htmlEditor.value=data.html;cssEditor.value=data.css;
@@ -334,6 +363,7 @@ export function renderProjectPanel(inspector,heading,showToast,id){
   let updateTimer;
   function changed(){
     project.html=htmlEditor.value;project.css=cssEditor.value;project.edited=true;project.detail=false;
+    project.nativePreview=null;
     clearTimeout(updateTimer);
     updateTimer=setTimeout(()=>{
       projectPreview(id);saveDrafts();status.textContent="Prévia atualizada na tela · alterações não modificam o seu backup.";
