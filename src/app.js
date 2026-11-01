@@ -1,5 +1,6 @@
 import {SYSTEMS, DEMO_GAMES, DEFAULT_THEME, safeTheme, escapeHTML, textToGames} from './model.js';
 import {exportTheme, exportSnapshot} from './export.js';
+import {renderFirmwarePanel} from './firmware-ui.js';
 
 const $ = id => document.getElementById(id);
 const STORAGE = 'r36s-web-lab:theme:v1';
@@ -7,6 +8,9 @@ const screen = $('screenContent');
 const inspector = $('inspectorContent');
 const tabs = {
   simulator: ['SIMULATOR / LIVE PREVIEW', 'Seu R36S, no navegador.', 'Explore a interface e teste mudanças sem alterar o aparelho.'],
+  viewer: ['DEVICE / 3D MODEL', 'O R36S em três dimensões.', 'Inspecione o modelo rotativo criado por Moh1993 no Sketchfab.'],
+  firmware: ['FIRMWARE / DISK INSPECTOR', 'Analise imagens do ArkOS.', 'Inspeção local e somente leitura de cabeçalhos e partições.'],
+  roms: ['EMULATION / ROM PLAYER', 'Jogue no navegador.', 'Emulação experimental de ROMs com núcleos externos, independente do ArkOS.'],
   theme: ['STUDIO / THEME EDITOR', 'Personalize cada detalhe.', 'Altere cores, tipografia e aparência com prévia imediata.'],
   library: ['LIBRARY / GAME DATA', 'Organize sua biblioteca.', 'Importe listas de jogos para testar os menus com dados reais.'],
   hardware: ['DEVICE / REFERENCE', 'Conheça a arquitetura.', 'Especificações de referência do R36S baseado no RK3326.']
@@ -61,10 +65,22 @@ function renderScreen() {
   screen.querySelector('.screen-entry.selected')?.scrollIntoView({block:'nearest'});
 }
 function renderInspector() {
-  $('inspectorCode').textContent = `${String(Object.keys(tabs).indexOf(state.tab)+1).padStart(2,'0')} / 04`;
+  $('inspectorCode').textContent = `${String(Object.keys(tabs).indexOf(state.tab)+1).padStart(2,'0')} / ${String(Object.keys(tabs).length).padStart(2,'0')}`;
   const heading = (title, description) => `<h2>${title}</h2><p class="panel-description">${description}</p>`;
   if (state.tab === 'simulator') {
     inspector.innerHTML = heading('Controles do dispositivo','Os botões do console, o teclado e controles USB/Bluetooth conectados ao navegador controlam esta prévia.') + `<div class="inspector-card"><div class="card-heading">MAPEAMENTO <span class="card-kicker">KEYBOARD</span></div><div class="metric-line"><span>Navegar</span><strong><span class="keychip">↑</span> <span class="keychip">↓</span> <span class="keychip">←</span> <span class="keychip">→</span></strong></div><div class="metric-line"><span>Selecionar</span><strong><span class="keychip">ENTER</span></strong></div><div class="metric-line"><span>Voltar</span><strong><span class="keychip">ESC</span></strong></div><div class="metric-line"><span>Menu principal</span><strong><span class="keychip">M</span></strong></div></div><div class="inspector-card"><div class="card-heading">SESSÃO <span class="counter-pill">SIMULADA</span></div><div class="metric-line"><span>Front-end de referência</span><strong>EmulationStation</strong></div><div class="metric-line"><span>Resolução visual</span><strong>640 × 480 · 4:3</strong></div><div class="metric-line"><span>Sistema selecionado</span><strong id="currentSystemLabel">${escapeHTML(selectedSystem().short)}</strong></div><div class="metric-line"><span>Jogos cadastrados</span><strong id="currentGameCount">${activeGames().length}</strong></div></div><div class="notification-box">Esta prévia reproduz interações de interface. Ela não inicializa o ArkOS nem executa jogos.</div>`;
+  } else if (state.tab === 'viewer') {
+    inspector.innerHTML = heading('R36S · Modelo 3D','Visualize e rotacione o console original incorporado pelo Sketchfab. A tela do modelo 3D ainda não recebe a saída da simulação 2D.')+
+      '<div class="inspector-card"><div class="card-heading">MODELO EXTERNO <span class="card-kicker">SKETCHFAB</span></div><div class="hardware-line"><span>Autor</span><strong>Moh1993</strong></div><div class="hardware-line"><span>Modelo</span><strong>R36S console</strong></div><a href="https://sketchfab.com/3d-models/r36s-console-c6ecbfabf473479a8ffd73149090c5bb" target="_blank" rel="noopener noreferrer" class="action-button secondary external-model-link">Abrir no Sketchfab ↗</a></div>'+
+      '<div class="notification-box">O visualizador 3D é hospedado pelo Sketchfab e requer conexão com seus servidores. O modelo não pode ser distribuído como parte do repositório sem licença adequada.</div>';
+  } else if (state.tab === 'firmware') {
+    renderFirmwarePanel(inspector, heading, showToast);
+  } else if (state.tab === 'roms') {
+    inspector.innerHTML = heading('ROM Player','Selecione a plataforma e um arquivo local dentro da área à esquerda. O emulador usa o EmulatorJS.')+
+      '<div class="inspector-card"><div class="card-heading">SUPORTE EXPERIMENTAL <span class="card-kicker">EMULATORJS</span></div>'+
+      [['NES','.nes'],['SNES','.sfc / .smc'],['Game Boy','.gb / .gbc'],['Game Boy Advance','.gba'],['PlayStation 1','.chd / .pbp / .bin / .iso / .img']].map(item=>'<div class="metric-line"><span>'+item[0]+'</span><strong>'+item[1]+'</strong></div>').join('')+'</div>'+
+      '<div class="notification-box">Uma ISO de PS1 é um disco de jogo, não uma imagem inicializável do ArkOS. CUE/BIN em múltiplos arquivos não são suportados nesta versão. BIOS e ROMs devem ser fornecidas legitimamente pelo usuário.</div>'+
+      '<p class="fine-print">Ao abrir um jogo, bibliotecas externas são carregadas do CDN do EmulatorJS. A execução pode depender de BIOS, formato, memória e suporte WebAssembly do navegador.</p>';
   } else if (state.tab === 'theme') {
     inspector.innerHTML = heading('Theme Studio','Ajuste a aparência do console e exporte um XML experimental baseado no formato de temas do EmulationStation.') + `<div class="inspector-card"><div class="card-heading">APARÊNCIA <span class="card-kicker">LIVE EDIT</span></div><div class="form-field"><label for="accentInput">Cor de destaque</label><div class="color-line"><input type="color" id="accentInput" value="${state.theme.accent}"/><code id="accentValue">${state.theme.accent.toUpperCase()}</code></div></div><div class="form-field"><label for="backgroundInput">Plano de fundo</label><select id="backgroundInput" class="field-select"><option value="midnight" ${state.theme.background==='midnight'?'selected':''}>Midnight Blue</option><option value="slate" ${state.theme.background==='slate'?'selected':''}>Slate</option><option value="graphite" ${state.theme.background==='graphite'?'selected':''}>Graphite</option></select></div><div class="form-field"><label for="fontScaleInput">Escala de texto</label><div class="range-line"><input type="range" id="fontScaleInput" min="80" max="125" step="5" value="${state.theme.fontScale}"/><output id="fontScaleValue">${state.theme.fontScale}%</output></div></div><label class="toggle-line" for="scanlinesInput">Efeito de linhas LCD <input type="checkbox" id="scanlinesInput" ${state.theme.scanlines?'checked':''}/></label></div><button type="button" class="action-button" id="exportThemeButton">Exportar theme.xml ↗</button><button type="button" class="action-button secondary" id="resetThemeButton">Restaurar padrão</button><p class="fine-print">O XML exportado é um ponto de partida. Alguns elementos variam entre forks do EmulationStation. Valide e teste no aparelho antes de instalar.</p>`;
     $('accentInput').addEventListener('input', e => updateTheme({accent:e.target.value}));
@@ -111,7 +127,15 @@ function back() {state.view=state.view==='games'?'systems':state.view==='menu'?'
 function act(control) {if(control==='up'||control==='down'||control==='left'||control==='right')navigate(control);else if(control==='confirm')confirmSelection();else if(control==='back')back();else if(control==='menu'){state.view=state.view==='menu'?'systems':'menu';state.menuIndex=0;renderScreen();}}
 function setTab(tab) {
   if(!tabs[tab])return;
+  const previousTab = state.tab;
   state.tab=tab;
+  $('consoleWrap').hidden=tab==='viewer'||tab==='roms';
+  $('sketchfabStage').hidden=tab!=='viewer';
+  $('romStage').hidden=tab!=='roms';
+  if (tab==='roms' && previousTab!=='roms') $('romFrame').src='./rom-player.html';
+  if (tab!=='roms' && previousTab==='roms') $('romFrame').src='about:blank';
+  document.querySelector('.stage-topline > span:first-child').textContent=tab==='viewer'?'3D MODEL':tab==='roms'?'ROM PLAYER':'DEVICE PREVIEW';
+  document.querySelector('.stage-mode').textContent=tab==='viewer'?'SKETCHFAB · MOH1993':tab==='roms'?'BROWSER EMULATION · BETA':tab==='firmware'?'DISK INSPECTION · READ ONLY':'R36S · SIMULATION MODE';
   document.querySelectorAll('[data-tab]').forEach(b=>{b.classList.toggle('selected',b.dataset.tab===tab);b.setAttribute('aria-current',b.dataset.tab===tab?'page':'false');});
   $('sectionEyebrow').textContent=tabs[tab][0];$('sectionTitle').textContent=tabs[tab][1];$('sectionDescription').textContent=tabs[tab][2];
   renderInspector();
