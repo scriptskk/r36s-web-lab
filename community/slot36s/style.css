@@ -19,3 +19,6 @@ body{font-family:ui-monospace,"Courier New",monospace;background:#070707;color:#
 .lab-entry{height:28px;border:1px solid transparent;color:#b2b2b2;font-size:11px;display:flex;justify-content:space-between;align-items:center;padding:4px 12px}
 .lab-entry[data-active="true"]{background:#eaeaea;color:#101010;border-color:#fff}
 .footer{margin-top:auto;padding-top:9px;border-top:1px solid #555;display:flex;justify-content:space-between}
+
+/* Historical image exported from the user's earlier cartridge reference. */
+.historic-cartridge{display:block;width:320px;height:auto;max-height:215px;object-fit:contain;filter:drop-shadow(0 12px 9px #0009)}
