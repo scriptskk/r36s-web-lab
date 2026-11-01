@@ -137,6 +137,7 @@ function localScripts(p){
   return found;
 }
 export function isProjectRuntimeEnabled(id){return !!projects[id]?.runJS;}
+export function isNativePokeForgePreview(id){return !!projects[id]?.nativePreview;}
 export function stopProjectRuntime(){
   for(const project of Object.values(projects))project.runJS=false;
   const frame=document.getElementById("projectPreviewFrame");
@@ -325,7 +326,7 @@ export function renderProjectPanel(inspector,heading,showToast,id){
   const repoStatus=inspector.querySelector("#projectRepoStatus");
   let fetching=false;
   async function reloadFromRepo(force=false){
-    if(fetching || (!force && (project.html||project.css||project.repoLoaded)))return;
+    if(fetching || (!force && (project.html||project.css||project.repoLoaded||project.nativePreview||project.localFiles.length)))return;
     fetching=true;repoStatus.textContent="Buscando prévia versionada no GitHub...";
     try{
       const data=await getCommunitySource(id);
