@@ -10,8 +10,10 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
+      - run: npm install --ignore-scripts --no-audit --no-fund --package-lock=false
       - run: npm test
       - run: node --check cloudflare/worker.js
+      - run: node --check cloudflare/access.js
       - run: node --check src/app.js
       - run: node --check src/firmware-ui.js
       - run: node --check src/rom-player.js
