@@ -3,6 +3,7 @@ import {exportTheme, exportSnapshot} from './export.js';
 import {renderFirmwarePanel} from './firmware-ui.js';
 import {renderBackupPanel} from './backup-ui.js';
 import {R36S_REFERENCE} from './hardware.js';
+import {renderProjectPanel,projectPreview,fitProjectFrame} from './project-lab-ui.js';
 import {auditAction,renderAuditPanel} from './audit.js';
 
 const $ = id => document.getElementById(id);
@@ -11,6 +12,8 @@ const screen = $('screenContent');
 const inspector = $('inspectorContent');
 const tabs = {
   simulator: ['SIMULATOR / LIVE PREVIEW', 'Seu R36S, no navegador.', 'Explore a interface e teste mudanças sem alterar o aparelho.'],
+  slot: ['PROJECTS / SLOT.R36S', 'Slot.R36S — prévia ao vivo.', 'Importe os arquivos reais do projeto para testar visuais dentro da tela de 640 × 480.'],
+  pkforge: ['PROJECTS / PKFORGE R36S', 'PKForge R36S — prévia ao vivo.', 'Importe os arquivos reais e acompanhe alterações de HTML/CSS imediatamente.'],
   viewer: ['DEVICE / 3D MODEL', 'O R36S em três dimensões.', 'Inspecione o modelo rotativo criado por Moh1993 no Sketchfab.'],
   firmware: ['FIRMWARE / DISK INSPECTOR', 'Analise imagens do ArkOS.', 'Inspeção local e somente leitura de cabeçalhos e partições.'],
   backup: ['WORKSPACE / BACKUP CATALOG', 'Explore seus arquivos.', 'Indexe uma pasta de backup já extraída, sem upload de jogos ou imagens.'],
@@ -76,6 +79,8 @@ function renderInspector() {
   const heading = (title, description) => `<h2>${title}</h2><p class="panel-description">${description}</p>`;
   if (state.tab === 'simulator') {
     inspector.innerHTML = heading('Controles do dispositivo','Os botões do console, o teclado e controles USB/Bluetooth conectados ao navegador controlam esta prévia.') + `<div class="inspector-card"><div class="card-heading">MAPEAMENTO <span class="card-kicker">KEYBOARD</span></div><div class="metric-line"><span>Navegar</span><strong><span class="keychip">↑</span> <span class="keychip">↓</span> <span class="keychip">←</span> <span class="keychip">→</span></strong></div><div class="metric-line"><span>Selecionar</span><strong><span class="keychip">ENTER</span></strong></div><div class="metric-line"><span>Voltar</span><strong><span class="keychip">ESC</span></strong></div><div class="metric-line"><span>Menu principal</span><strong><span class="keychip">M</span></strong></div></div><div class="inspector-card"><div class="card-heading">SESSÃO <span class="counter-pill">SIMULADA</span></div><div class="metric-line"><span>Front-end de referência</span><strong>EmulationStation</strong></div><div class="metric-line"><span>Resolução visual</span><strong>640 × 480 · 4:3</strong></div><div class="metric-line"><span>Sistema selecionado</span><strong id="currentSystemLabel">${escapeHTML(selectedSystem().short)}</strong></div><div class="metric-line"><span>Jogos cadastrados</span><strong id="currentGameCount">${activeGames().length}</strong></div></div><div class="notification-box">Esta prévia reproduz interações de interface. Ela não inicializa o ArkOS nem executa jogos.</div>`;
+  } else if (state.tab === 'slot' || state.tab === 'pkforge') {
+    renderProjectPanel(inspector,heading,showToast,state.tab);
   } else if (state.tab === 'viewer') {
     inspector.innerHTML = heading('R36S · Modelo 3D','Visualize e rotacione o console original incorporado pelo Sketchfab. A tela do modelo 3D ainda não recebe a saída da simulação 2D.')+
       '<div class="inspector-card"><div class="card-heading">MODELO EXTERNO <span class="card-kicker">SKETCHFAB</span></div><div class="hardware-line"><span>Autor</span><strong>Moh1993</strong></div><div class="hardware-line"><span>Modelo</span><strong>R36S console</strong></div><a href="https://sketchfab.com/3d-models/r36s-console-c6ecbfabf473479a8ffd73149090c5bb" target="_blank" rel="noopener noreferrer" class="action-button secondary external-model-link">Abrir no Sketchfab ↗</a></div>'+
@@ -136,19 +141,24 @@ function confirmSelection() {
   renderScreen();if(state.tab==='simulator')renderInspector();
 }
 function back() {state.view=state.view==='games'?'systems':state.view==='menu'?'systems':'systems';renderScreen();if(state.tab==='simulator')renderInspector();}
-function act(control) {if(control==='up'||control==='down'||control==='left'||control==='right')navigate(control);else if(control==='confirm')confirmSelection();else if(control==='back')back();else if(control==='menu'){state.view=state.view==='menu'?'systems':'menu';state.menuIndex=0;renderScreen();}}
+function act(control) {if(state.tab==='slot'||state.tab==='pkforge'){showToast('Controles do R36S ainda não ligados aos arquivos HTML importados.');return;}if(control==='up'||control==='down'||control==='left'||control==='right')navigate(control);else if(control==='confirm')confirmSelection();else if(control==='back')back();else if(control==='menu'){state.view=state.view==='menu'?'systems':'menu';state.menuIndex=0;renderScreen();}}
 function setTab(tab) {
   if(!tabs[tab])return;
   const previousTab = state.tab;
   state.tab=tab;
   if(tab==='viewer'&&previousTab!=='viewer')auditAction('model_opened',{section:'Modelo 3D'});
   $('consoleWrap').hidden=tab==='viewer'||tab==='roms';
+  const editingProject = tab==='slot'||tab==='pkforge';
+  const projectFrame = $('projectPreviewFrame');
+  projectFrame.hidden=!editingProject;
+  screen.hidden=editingProject;
+  if(editingProject){projectPreview(tab);requestAnimationFrame(fitProjectFrame);}
   $('sketchfabStage').hidden=tab!=='viewer';
   $('romStage').hidden=tab!=='roms';
   if (tab==='roms' && previousTab!=='roms') $('romFrame').src='./rom-player.html';
   if (tab!=='roms' && previousTab==='roms') $('romFrame').src='about:blank';
-  document.querySelector('.stage-topline > span:first-child').textContent=tab==='viewer'?'3D MODEL':tab==='roms'?'ROM PLAYER':'DEVICE PREVIEW';
-  document.querySelector('.stage-mode').textContent=tab==='viewer'?'SKETCHFAB · MOH1993':tab==='roms'?'BROWSER EMULATION · BETA':tab==='firmware'?'DISK INSPECTION · READ ONLY':'R36S · SIMULATION MODE';
+  document.querySelector('.stage-topline > span:first-child').textContent=tab==='viewer'?'3D MODEL':tab==='roms'?'ROM PLAYER':editingProject?'PROJECT LIVE PREVIEW':'DEVICE PREVIEW';
+  document.querySelector('.stage-mode').textContent=tab==='viewer'?'SKETCHFAB · MOH1993':tab==='roms'?'BROWSER EMULATION · BETA':editingProject?'HTML + CSS · LIVE · NO SCRIPTS':tab==='firmware'?'DISK INSPECTION · READ ONLY':'R36S · SIMULATION MODE';
   document.querySelectorAll('[data-tab]').forEach(b=>{b.classList.toggle('selected',b.dataset.tab===tab);b.setAttribute('aria-current',b.dataset.tab===tab?'page':'false');});
   $('sectionEyebrow').textContent=tabs[tab][0];$('sectionTitle').textContent=tabs[tab][1];$('sectionDescription').textContent=tabs[tab][2];
   renderInspector();
@@ -167,7 +177,7 @@ document.addEventListener('keydown',event=>{
   const target=event.target;
   if(target instanceof HTMLElement && (['INPUT','SELECT','TEXTAREA'].includes(target.tagName)||target.isContentEditable))return;
   const keys={'ArrowUp':'up','ArrowDown':'down','ArrowLeft':'left','ArrowRight':'right','Enter':'confirm','Escape':'back','Backspace':'back','m':'menu','M':'menu'};
-  if(keys[event.key]){event.preventDefault();act(keys[event.key]);}
+  if(keys[event.key] && state.tab!=='slot' && state.tab!=='pkforge'){event.preventDefault();act(keys[event.key]);}
 });
 
 // Standard Gamepad mapping: axes (D-pad/sticks) and buttons A/B/Start.
@@ -185,3 +195,5 @@ function pollGamepad() {
   requestAnimationFrame(pollGamepad);
 }
 renderScreen();setTab('simulator');pollGamepad();
+if(typeof ResizeObserver!=='undefined')new ResizeObserver(fitProjectFrame).observe($('consoleScreen'));
+window.addEventListener('resize',fitProjectFrame);
