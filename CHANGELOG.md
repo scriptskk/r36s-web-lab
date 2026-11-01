@@ -1,5 +1,15 @@
 # Changelog
 
+## [0.7.0] — 2026-11-01
+
+- Created persistent GitHub source folders for the two historic community projects.
+- SLOT36S: original conversation concept of a GBA cartridge recreated as a simple, navigable reference HTML/CSS screen. Source/art assets of the original application remain unavailable.
+- PKForge R36S: explicit missing-source placeholder with a working preview menu, not the actual program.
+- Both project workspaces can now load updated repository HTML/CSS, edit it locally, export a sanitized preview, and navigate data-lab-item entries with the physical/keyboard gamepad input.
+- Added provenance manifest and documentation; Cloudflare static builder bundles project folders and their texts, while the worker retains Access authentication.
+- Did not claim to boot ArkOS, reproduce original system software or import copyrighted game data.
+
+
 ## [0.6.0] — 2026-11-01
 
 - Replaced the illustrated 2D chassis with the actual transparent R36S photo supplied for this laboratory, optimized to WebP.
