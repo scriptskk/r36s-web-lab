@@ -1,0 +1,30 @@
+{
+  "schema": 1,
+  "notice": "Catálogo reconstruído a partir de referências históricas; não equivale ao código executável original.",
+  "projects": [
+    {
+      "id": "slot",
+      "slug": "slot36s",
+      "title": "SLOT36S",
+      "status": "referencia-reconstruida",
+      "sourceVerified": false,
+      "reference": "Cartucho Game Boy Advance com Paisagem Fantástica.png, recuperado do histórico; modelo de cartucho e mídia visual.",
+      "preview": "community/slot36s/preview.html",
+      "stylesheet": "community/slot36s/style.css",
+      "repositoryFolder": "https://github.com/scriptskk/r36s-web-lab/tree/main/community/slot36s",
+      "next": "Substituir pela interface e assets completos do SLOT36S quando disponíveis."
+    },
+    {
+      "id": "pkforge",
+      "slug": "pkforge-r36s",
+      "title": "PKForge R36S",
+      "status": "placeholder",
+      "sourceVerified": false,
+      "reference": "Nome do projeto e intenção de integrar suas implementações ao Web Lab; fonte original não localizada.",
+      "preview": "community/pkforge-r36s/preview.html",
+      "stylesheet": "community/pkforge-r36s/style.css",
+      "repositoryFolder": "https://github.com/scriptskk/r36s-web-lab/tree/main/community/pkforge-r36s",
+      "next": "Importar código e interface originais do PKForge R36S."
+    }
+  ]
+}
