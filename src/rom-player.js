@@ -1,3 +1,4 @@
+import {auditAction} from "./audit.js";
 const $ = id => document.getElementById(id);
 const extensions = {
   nes:[".nes"], snes:[".sfc",".smc"], gb:[".gb",".gbc"], gba:[".gba"],
@@ -17,6 +18,7 @@ $("launch").addEventListener("click",()=>{
   activeUrls.push(romUrl);
   const biosUrl=bios ? URL.createObjectURL(bios) : "";
   if(biosUrl) activeUrls.push(biosUrl);
+  auditAction("rom_launch_requested",{system:core,format:chosenExtension(rom.name),size_bytes:rom.size});
   window.EJS_player="#game";
   window.EJS_gameUrl=romUrl;
   window.EJS_biosUrl=biosUrl;
