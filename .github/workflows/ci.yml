@@ -14,6 +14,8 @@ jobs:
       - run: npm test
       - run: node --check cloudflare/worker.js
       - run: node --check cloudflare/access.js
+      - run: node --check src/project-lab.js
+      - run: node --check src/project-lab-ui.js
       - run: node --check src/app.js
       - run: node --check src/firmware-ui.js
       - run: node --check src/rom-player.js
