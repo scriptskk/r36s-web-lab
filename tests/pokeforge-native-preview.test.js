@@ -18,8 +18,10 @@ test("recognizes native Go/ARM PokeForge archive from original filename patterns
 test("renders eight native PokeForge pages at 640x480 without launching binaries",()=>{
  const state=newPokeForgePreview([{id:1,name:"Bulbasaur"},{id:25,name:"Pikachu"}]);
  const initial=renderPokeForgePreview(state);
- assert.match(initial.html,/WELCOME \/ PKFORGE R36S/);
- assert.match(initial.html,/HOME/);
+ assert.match(initial.html,/MY PROFILE \/ OFFLINE/);
+ pokeForgeControl(state,"confirm");
+ assert.match(renderPokeForgePreview(state).html,/WELCOME \/ PKFORGE R36S/);
+ assert.match(renderPokeForgePreview(state).html,/HOME/);
  assert.match(initial.css,/width:640px;height:480px/);
  assert.match(initial.html,/NOT NATIVE EXECUTION/);
  for(let i=0;i<7;i++)pokeForgeControl(state,"r2");
@@ -33,6 +35,7 @@ test("renders eight native PokeForge pages at 640x480 without launching binaries
 });
 test("PokeForge shoulders switch tabs and generations as in the provided Go sources",()=>{
  const state=newPokeForgePreview([{id:1,name:"Bulbasaur"},{id:152,name:"Chikorita"}]);
+ pokeForgeControl(state,"confirm");
  pokeForgeControl(state,"l2");assert.equal(state.page,7);
  pokeForgeControl(state,"r1");assert.equal(state.gen,1);
  assert.equal(pokeForgeEntries(state)[0].name,"Chikorita");
