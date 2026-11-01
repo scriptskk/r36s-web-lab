@@ -11,3 +11,6 @@ jobs:
         with:
           node-version: '22'
       - run: npm test
+      - run: node --check src/app.js
+      - run: node --check src/firmware-ui.js
+      - run: node --check src/rom-player.js
