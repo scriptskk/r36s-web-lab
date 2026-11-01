@@ -1,81 +1,81 @@
 # R36S Web Lab
 
-Laboratório web de interface, visualização do R36S e inspeção local de imagens de firmware. O projeto é independente da comunidade ArkOS, EmulationStation e Sketchfab.
+Open-source tools for working with R36S user interfaces, inspecting local firmware headers and cataloguing extracted backup folders. Includes a separate private server with login and SQLite activity records.
 
-> **Importante:** o projeto não inicializa o firmware real do R36S e não é um emulador do SoC Rockchip RK3326. O ROM Player usa núcleos de terceiros no navegador para jogos compatíveis, não executa o sistema operacional ArkOS.
+> The project does NOT boot ArkOS or emulate the Rockchip RK3326. Its reference profile does not limit physical CPU, RAM or GPU resources on the host machine.
 
-![Prévia da interface simulada](docs/preview.png)
+## Current modules
 
-## Ferramentas
+| Module | Function | Actual scope |
+| --- | --- | --- |
+| 3D model | Official Sketchfab embed of the R36S console by Moh1993 | Rotate and inspect the external model; its screen is not linked to the 2D UI |
+| Simulator | 2D EmulationStation-inspired menus, input and appearance | Interface demonstration, not ArkOS |
+| Hardware | RK3326 / 4× Cortex-A35 / Mali-G31 MP2 / 1 GiB DDR3L | Reference specification only; no ARM emulation or enforced limits |
+| Screen | 640 × 480 pixels in 4:3 | Correct pixel aspect in CSS; chassis proportions are reference estimates, not measured on your unit |
+| Firmware Lab | Read local image headers, MBR, optical ISO and DTB signatures | Does not mount partitions, extract image archives or boot |
+| Backup | Catalogue local directories (ROMs, themes, BIOS, configs) | File names and sizes are counted in memory; no copying or uploading |
+| ROM Player | Experimental EmulatorJS core for select user-provided game files | Not the emulators from your ArkOS image, not a full R36S |
+| Theme Studio | Palette and typography preview, starter XML export | Needs validation on your actual EmulationStation fork |
+| Activity | View SQLite events, logout | Only works behind the private Flask application, not GitHub Pages |
 
-- **Modelo 3D:** incorporação oficial do [R36S console de Moh1993 no Sketchfab](https://sketchfab.com/3d-models/r36s-console-c6ecbfabf473479a8ffd73149090c5bb), com câmera interativa e atribuição permanente.
-- **Simulador:** menus 2D, botões, teclado e Gamepad API. A tela 2D não está conectada à superfície do modelo do Sketchfab.
-- **Firmware Lab:** importa localmente arquivos .img, .iso, .img.xz, .img.gz, .zip e .dtb. Lê os primeiros 34 KiB e identifica assinaturas MBR, ISO 9660, FDT e partições MBR quando disponíveis. Não descomprime nem executa firmware.
-- **ROM Player (beta):** interface separada para arquivos próprios de NES, SNES, Game Boy, Game Boy Advance e PlayStation 1, por meio de [EmulatorJS](https://emulatorjs.org/). ROMs, ISOs de jogo e BIOS não são distribuídas. Compatibilidade experimental; ainda depende de verificação prática com arquivos reais e ambiente de navegador.
-- **Theme Studio:** prévia 2D de paleta, fundo, fonte e linhas LCD, com exportação de XML experimental do EmulationStation.
-- **Biblioteca:** importação local e limitada de gamelist.xml, sem execução dos arquivos listados.
-- **Hardware:** especificações de referência; clones, revisões de placa e painéis diferem.
+See [docs/PRIVATE_DEPLOYMENT.md](docs/PRIVATE_DEPLOYMENT.md) to set up the administrator password, authenticated web server, activity database and HTTPS access.
 
-## Arquivos .img e .iso: diferença
+## R36S reference profile
 
-O ArkOS usado no R36S é geralmente distribuído como **imagem de cartão microSD**, muitas vezes no formato .img.xz. O firmware depende de bootloader, device tree, kernel, GPU, periféricos e componentes específicos do RK3326. Abrir ou reconhecer suas partições **não equivale a dar boot**.
+- SoC: Rockchip RK3326 / ARM Cortex-A35 / 4 cores / maximum nominal ~1.5 GHz.
+- GPU: ARM Mali-G31 MP2.
+- Memory: 1 GiB DDR3L.
+- Display: 3.5-inch IPS, 640 × 480, native 4:3.
+- Storage: two microSD slots on the standard device.
+- Dimensions used for the 2D shell outline: nominal 130 × 83 × 35 mm. Different revisions and sources vary. The 3D model preserves the author's original geometry and is not independently measured against a physical unit.
+- Real hardware has panel/DTB/PCB variants. Device-specific fidelity requires matching those details to the target unit.
 
-Uma .iso normalmente descreve um disco óptico. O ROM Player pode tentar abrir algumas imagens de **disco de jogo PlayStation 1** como .iso, mas isso **não inicializa ArkOS**. Imagens de cartão ArkOS são inspecionadas somente no Firmware Lab. Arquivos CUE/BIN com múltiplos arquivos não são suportados pelo carregamento atual.
+These numbers are descriptive. Setting a browser's memory cap or CSS aspect ratio does not reproduce RK3326 timing, ARM behavior, Mali GPU rendering, microSD I/O, battery or peripherals.
 
-Para emular o sistema completo será preciso um backend/simulador de hardware próprio, com testes específicos dos periféricos e do kernel. Um QEMU genérico não garante que a imagem original do R36S inicialize.
+## Privacy and storage
 
-## Execução local
+The GitHub repository contains only public code, tests and documentation. Do not commit any personal firmware image, SD backup, ROM, BIOS, archive, user password, database or generated secret.
 
-Hospede a pasta usando HTTP:
+The private Flask instance uses a single administrator password hashed by Werkzeug scrypt, signed session cookies, CSRF protection and a local SQLite audit trail outside the repository. Events record validated metadata, not file contents. Audit data is not a tamper-proof forensic trail.
 
-```bash
+The Sketchfab embed connects to Sketchfab; the EmulatorJS player loads external code from the EmulatorJS CDN on demand. Review external providers' licenses and privacy policies before use.
+
+## Run source-only simulator for development
+
+~~~bash
 python3 -m http.server 4173
-```
+~~~
 
-Abra http://localhost:4173. O site também é publicado via GitHub Pages após a habilitação do Pages na configuração do repositório.
+Open http://localhost:4173. This static preview does NOT have authentication or an audit database and must not be used to host sensitive files.
 
-Para executar os testes unitários, com Node.js 22 ou superior:
+For unit tests with Node.js 22:
 
-```bash
+~~~bash
 npm test
-```
+~~~
 
+For private deployment use the separate documented Flask application. There is no automatic public Pages workflow, since Pages does not provide private authentication.
 
-## Dados, privacidade e terceiros
+## Backups and emulators
 
-- O Firmware Lab lê apenas o início do arquivo com File.slice; não transfere imagens para um servidor e não altera SD.
-- O simulador e o editor guardam apenas preferências visuais no armazenamento local. O parser de gamelist.xml rejeita DOCTYPE/ENTITY e impõe limites de tamanho e de itens.
-- A aba 3D carrega conteúdo externo diretamente dos servidores Sketchfab (inclusive sua política de privacidade, cookies e coleta técnica).
-- O ROM Player solicita a biblioteca de emulação ao CDN do EmulatorJS após a escolha de iniciar. O código do Web Lab usa object URLs para arquivos locais; bibliotecas externas podem ter comportamentos e políticas próprios. Não forneça arquivos sensíveis ou não autorizados.
-- Nenhum arquivo de firmware, ROM, BIOS, modelo 3D ou textura de terceiros está incorporado ao repositório.
-- Utilize apenas dumps e arquivos que você tenha direito de executar. Faça backup antes de modificar um R36S físico.
+ArkOS SD backups are usually .img or compressed images (such as .img.xz), not conventional PC ISO installers. The firmware inspector reads a small header, even for a huge backup. To catalogue files from the SD, use a locally extracted/mounted backup folder. This does not install any emulator or ROM.
 
-## Estrutura
+Only use games, BIOS and backups you are legally allowed to use. No ROMs, firmware or BIOS are distributed here.
 
-```text
-index.html                interface principal
-styles.css                estilos e responsividade
-rom-player.html           ambiente de execução de ROM separado
-rom-player.css            estilos do ambiente ROM Player
-src/app.js                navegação e simulação 2D
-src/model.js              modelo de dados e exportação XML
-src/firmware.js           inspeção de cabeçalho de imagem em leitura
-src/firmware-ui.js        interface para inspeção de imagens
-src/rom-player.js         inicialização do EmulatorJS sob demanda
-tests/                    testes unitários
-.github/workflows/        integração contínua e Pages
-```
+## Roadmap
 
+1. Identify the exact motherboard and display/DTB revision of a real R36S for calibration.
+2. Read and validate complete theme packages and extracted boot/game partitions in a controlled sandbox.
+3. Add protected backup storage and revisioned workspace changes, preserving source files read-only.
+4. Investigate a separate RK3326-accurate emulator, including ARM, Mali, interrupts, boot chain, I/O and benchmark calibration against the console. There is no promise that unmodified ArkOS images will boot.
+5. If the original 3D model is licensed for derivative use, integrate a controlled screen texture with a calibrated 640 × 480 framebuffer.
 
-## Publicação
+## Attribution and license
 
-No repositório GitHub, abra Settings → Pages e selecione **GitHub Actions** em Build and deployment → Source. Depois execute o workflow em Actions. Sem essa configuração, actions/configure-pages pode falhar com HTTP 404 antes de publicar qualquer arquivo.
+- [R36S console model by Moh1993](https://sketchfab.com/3d-models/r36s-console-c6ecbfabf473479a8ffd73149090c5bb). Embedded from Sketchfab, not redistributed. All model rights remain with the creator.
+- [EmulatorJS](https://github.com/EmulatorJS/EmulatorJS) optional third-party browser emulation runtime, subject to its own licensing.
+- [ArkOS](https://github.com/christianhaitian/arkos/wiki) independent Linux firmware.
+- [EmulationStation theme specification](https://github.com/Aloshi/EmulationStation/blob/master/THEMES.md).
+- [Handhelds Wiki / R36S](https://handhelds.wiki/R36S).
 
-## Créditos e licenças
-
-- Modelo incorporado: [R36S console](https://sketchfab.com/3d-models/r36s-console-c6ecbfabf473479a8ffd73149090c5bb) por [Moh1993](https://sketchfab.com/Moh1993), hospedado no Sketchfab. O arquivo 3D **não** faz parte desta distribuição. Direitos do autor preservados.
-- Emulação opcional: [EmulatorJS](https://github.com/EmulatorJS/EmulatorJS), software independente disponibilizado por CDN, sob as respectivas licenças e termos.
-- ArkOS: [AeolusUX/ArkOS-R3XS](https://github.com/AeolusUX/ArkOS-R3XS) e [ArkOS Wiki](https://github.com/christianhaitian/arkos/wiki).
-- Interface de temas: [EmulationStation THEMES.md](https://github.com/Aloshi/EmulationStation/blob/master/THEMES.md).
-
-O código original do R36S Web Lab é MIT (LICENSE). A licença MIT deste repositório não abrange modelos externos, componentes do Sketchfab, núcleos de emulação, ArkOS, ROMs ou BIOS.
+The original code in this repository is MIT-licensed (LICENSE). This does not license third-party ROMs, firmware, emulators, models or trademarks.
