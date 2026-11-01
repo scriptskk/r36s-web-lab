@@ -1,5 +1,12 @@
 # Changelog
 
+## Cloudflare Free deployment preparation — 2026-11-01
+
+- Added a Cloudflare Worker with signed Access JWT verification for every asset and API request, administrator email allowlist and CSRF-protected events.
+- Added D1-backed log API, isolated web-only build output and Wrangler configuration.
+- Added free-tier deployment guide, requiring user-owned Cloudflare setup before site can go online.
+- No ArkOS boot, full backup storage or hardware emulation is claimed.
+
 ## [0.3.0] — 2026-11-01
 
 ### Added
