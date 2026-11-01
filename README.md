@@ -1,5 +1,8 @@
 # R36S Web Lab
 
+**v0.8 — Importação de projetos:** importe os seus ZIPs de SLOT36S e PKForge R36S diretamente no laboratório privado, explore os arquivos e selecione a tela HTML principal. O editor HTML/CSS tem prévia 640×480 e há um modo experimental opt-in para JavaScript web em iframe de origem isolada. Adicionados controles físicos simulados L1/L2/R1/R2 (mouse, Q/E/Z/C e gamepad padrão 4–7). **Não é uma emulação ArkOS/RK3326 e não garante execução universal.** [Instruções, escopo e segurança](docs/IMPORT_AND_RUNTIME.md).
+
+
 **v0.7 — Projetos históricos no laboratório:** pastas [SLOT36S](community/slot36s/) e [PKForge R36S](community/pkforge-r36s/) exportadas como referências versionadas no GitHub. Abra a pasta **Projetos da comunidade** e escolha um projeto para carregar a prévia 640×480, editar HTML/CSS e testar a navegação pelos botões R36S. [Catálogo e proveniência](community/README.md). *A fonte original do Slot e do PKForge não foi localizada; o Slot é uma reconstrução baseada em referência histórica e o PKForge é placeholder explícito.*
 
 
