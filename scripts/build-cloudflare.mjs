@@ -4,7 +4,7 @@ const root=process.cwd();
 const output=path.join(root,"dist");
 await rm(output,{recursive:true,force:true});
 await mkdir(output,{recursive:true});
-for(const filename of ["index.html","styles.css","premium.css","monochrome.css","rom-player.html","rom-player.css"]){
+for(const filename of ["index.html","styles.css","premium.css","monochrome.css","rom-player.html","rom-player.css","project-runtime.html"]){
   await copyFile(path.join(root,filename),path.join(output,filename));
 }
 await cp(path.join(root,"assets"),path.join(output,"assets"),{recursive:true});
@@ -20,7 +20,7 @@ async function walk(folder, prefix=""){
   }
 }
 await walk(output);
-const expected=["index.html","styles.css","premium.css","monochrome.css","src/app.js","src/site-theme.js","src/audit.js","src/firmware.js","src/backup.js","src/community-loader.js","community/catalog.json","community/slot36s/preview.html","community/slot36s/assets/cartucho-historico.webp","community/pkforge-r36s/preview.html"];
+const expected=["index.html","styles.css","premium.css","monochrome.css","src/app.js","src/site-theme.js","src/audit.js","src/firmware.js","src/backup.js","src/community-loader.js","src/zip-import.js","project-runtime.html","community/catalog.json","community/slot36s/preview.html","community/slot36s/assets/cartucho-historico.webp","community/pkforge-r36s/preview.html"];
 for(const filename of expected)if(!files.includes(filename))throw Error("Missing asset: "+filename);
 if(files.some(f=>f.includes(".env")||f.endsWith(".db")||f.endsWith(".sqlite3")||f.startsWith("private_server/")))throw Error("Unexpected private asset");
 console.log("Cloudflare asset bundle created:",files.length,"files.");
