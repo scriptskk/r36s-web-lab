@@ -138,7 +138,7 @@ export function renderPokeForgePreview(state){
   const status='<span class="pf-preview-flag">UI ADAPTER · GO / ARM · NOT NATIVE EXECUTION</span>';
   return {html:'<div class="pf-root" style="--pf-base:'+COLORS[state.theme][0]+';--pf-mid:'+COLORS[state.theme][1]+';--pf-hot:'+COLORS[state.theme][2]+';--pf-gold:'+COLORS[state.theme][3]+'">'+header+side+'<main class="pf-main">'+main+'</main>'+footer+status+'</div>',css:POKEFORGE_CSS};
 }
-export const POKEFORGE_CSS=String.raw\`
+export const POKEFORGE_CSS=String.raw`
 *{box-sizing:border-box}html,body{margin:0;width:640px;height:480px;overflow:hidden}
 body{font:13px/1.25 "Courier New",ui-monospace,monospace;background:#142337;color:#fff}
 .pf-root{position:relative;width:640px;height:480px;background:var(--pf-base);color:#fff;overflow:hidden}
@@ -189,4 +189,4 @@ body{font:13px/1.25 "Courier New",ui-monospace,monospace;background:#142337;colo
 .pf-dialog small{color:var(--pf-gold)}
 .pf-footer{position:absolute;bottom:0;left:0;right:0;height:40px;background:var(--pf-mid);border-top:2px solid var(--pf-hot);padding:12px 14px;font-size:11px;white-space:nowrap;letter-spacing:-.04em}
 .pf-preview-flag{position:absolute;bottom:42px;right:2px;z-index:9;font-size:8px;background:#0b0b0bdf;padding:3px 6px;color:#e4d2a1;letter-spacing:.04em}
-\`;
+`;
