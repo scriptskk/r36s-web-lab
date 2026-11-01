@@ -1,6 +1,7 @@
 const apiBase = "./api/";
 let csrfToken = null;
 let privateStatus = null;
+let backendMode = null;
 
 export async function detectPrivateServer() {
   if (privateStatus !== null) return privateStatus;
@@ -10,6 +11,7 @@ export async function detectPrivateServer() {
     const data=await res.json();
     if (!data.authenticated || !data.csrf_token) return privateStatus=false;
     csrfToken=data.csrf_token;
+    backendMode=data.mode || 'private';
     privateStatus=true;
   } catch {privateStatus=false;}
   return privateStatus;
@@ -25,7 +27,7 @@ export async function auditAction(action,details={}) {
   } catch {return false;}
 }
 export function renderAuditPanel(inspector,heading) {
-  inspector.innerHTML=heading("Histórico privado","Registros do servidor SQLite, ordenados do mais recente para o mais antigo. Apenas ações registradas pela aplicação aparecem aqui.")+
+  inspector.innerHTML=heading("Histórico privado","Registros do banco do laboratório, ordenados do mais recente ao mais antigo. Apenas ações registradas pela aplicação aparecem aqui.")+
     '<div id="auditStatus" class="notification-box" role="status">Conectando ao banco de dados...</div>'+
     '<div id="auditEvents" class="audit-events"></div>'+
     '<button id="auditRefresh" type="button" class="action-button secondary">Atualizar histórico</button>'+
@@ -56,6 +58,10 @@ export function renderAuditPanel(inspector,heading) {
   }
   inspector.querySelector("#auditRefresh").addEventListener("click",refresh);
   inspector.querySelector("#auditLogout").addEventListener("click",async()=>{
+    if (backendMode==="cloudflare") {
+      window.location.assign("/cdn-cgi/access/logout");
+      return;
+    }
     if (!csrfToken) return;
     const r=await fetch("./logout",{method:"POST",headers:{"X-CSRFToken":csrfToken},credentials:"same-origin"});
     if(r.ok || r.redirected) window.location.assign("./login");
