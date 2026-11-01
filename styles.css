@@ -17,3 +17,13 @@
 .firmware-results .hardware-line strong{overflow-wrap:anywhere}
 @media(max-width:940px){.sketchfab-stage iframe{height:540px;min-height:400px}.rom-stage iframe{height:590px;min-height:400px}}
 @media(max-width:680px){.sketchfab-stage,.rom-stage{padding:9px 9px 0}.sketchfab-stage iframe{height:500px;min-height:400px}.rom-stage iframe{height:550px;min-height:400px}.model-credit{padding:10px 4px}.device-stage{min-height:640px}}
+
+/* Chassis face ratio based on the 83 × 130 mm reference, not a measured shell. */
+.console-shell{width:340px;height:532px;flex:0 0 340px}
+.controls{height:230px}
+.console-screen{aspect-ratio:4/3}
+.audit-events{max-height:450px;overflow:auto;margin-top:15px}
+.audit-event{display:flex;flex-direction:column;gap:4px;padding:11px 0;border-bottom:1px solid #273b50;overflow-wrap:anywhere;font-size:11px}
+.audit-event strong{font-weight:650;color:#dfedff}
+.audit-event small,.audit-event span{color:#8299b4;font-size:10px}
+@media(max-width:410px){.console-shell{transform:scale(.75);flex-shrink:0}.console-wrap{min-height:430px;max-height:465px;overflow:hidden}}
