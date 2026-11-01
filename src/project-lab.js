@@ -25,6 +25,7 @@ export function fileCategory(path){
   if(e==="html"||e==="htm")return "html";
   if(e==="css")return "css";
   if(e==="xml")return "xml";
+  if(e==="js"||e==="mjs")return "javascript";
   if(ACCEPTED_IMAGES.has(e))return "image";
   return "unsupported";
 }
@@ -40,7 +41,7 @@ export function projectManifest(files){
     total+=size;
     if(total>MAX_TOTAL_BYTES)throw Error("Limite de 16 MB por projeto. Não selecione ROMs ou backups inteiros.");
     const category=fileCategory(path);
-    if((category==="html"||category==="css"||category==="xml")&&size>MAX_TEXT_BYTES)
+    if((category==="html"||category==="css"||category==="xml"||category==="javascript")&&size>MAX_TEXT_BYTES)
       throw Error("HTML/CSS/XML deve ter até 1 MB por arquivo.");
     if(category==="image"&&size>MAX_IMAGE_BYTES)
       throw Error("Imagem deve ter até 3 MB por arquivo.");
@@ -49,6 +50,7 @@ export function projectManifest(files){
   return {files:manifest,total,count:manifest.length,
     html:manifest.filter(f=>f.category==="html").length,
     css:manifest.filter(f=>f.category==="css").length,
+    javascript:manifest.filter(f=>f.category==="javascript").length,
     images:manifest.filter(f=>f.category==="image").length,
     unsupported:manifest.filter(f=>f.category==="unsupported").length
   };
