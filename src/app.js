@@ -1,6 +1,8 @@
 import {SYSTEMS, DEMO_GAMES, DEFAULT_THEME, safeTheme, escapeHTML, textToGames} from './model.js';
 import {exportTheme, exportSnapshot} from './export.js';
 import {renderFirmwarePanel} from './firmware-ui.js';
+import {R36S_REFERENCE} from './hardware.js';
+import {auditAction,renderAuditPanel} from './audit.js';
 
 const $ = id => document.getElementById(id);
 const STORAGE = 'r36s-web-lab:theme:v1';
@@ -10,6 +12,7 @@ const tabs = {
   simulator: ['SIMULATOR / LIVE PREVIEW', 'Seu R36S, no navegador.', 'Explore a interface e teste mudanças sem alterar o aparelho.'],
   viewer: ['DEVICE / 3D MODEL', 'O R36S em três dimensões.', 'Inspecione o modelo rotativo criado por Moh1993 no Sketchfab.'],
   firmware: ['FIRMWARE / DISK INSPECTOR', 'Analise imagens do ArkOS.', 'Inspeção local e somente leitura de cabeçalhos e partições.'],
+  audit: ['WORKSPACE / ACTIVITY LOG', 'Registro de atividades.', 'Consulte alterações registradas no banco SQLite do servidor privado.'],
   roms: ['EMULATION / ROM PLAYER', 'Jogue no navegador.', 'Emulação experimental de ROMs com núcleos externos, independente do ArkOS.'],
   theme: ['STUDIO / THEME EDITOR', 'Personalize cada detalhe.', 'Altere cores, tipografia e aparência com prévia imediata.'],
   library: ['LIBRARY / GAME DATA', 'Organize sua biblioteca.', 'Importe listas de jogos para testar os menus com dados reais.'],
@@ -20,6 +23,8 @@ let theme;
 try { theme = safeTheme(JSON.parse(localStorage.getItem(STORAGE))); } catch {theme = {...DEFAULT_THEME};}
 const state = {tab: 'simulator', view: 'systems', systemIndex: 0, itemIndex: 0, menuIndex: 0, library: structuredClone(DEMO_GAMES), theme};
 let toastTimer;
+let themeAuditTimer;
+function scheduleThemeAudit(){clearTimeout(themeAuditTimer);themeAuditTimer=setTimeout(()=>auditAction('theme_updated',{section:'Theme Studio'}),650);}
 let lastGamepadButtons = new Set();
 let lastGamepadAxes = [0,0];
 let gamepadReady = false;
@@ -73,6 +78,8 @@ function renderInspector() {
     inspector.innerHTML = heading('R36S · Modelo 3D','Visualize e rotacione o console original incorporado pelo Sketchfab. A tela do modelo 3D ainda não recebe a saída da simulação 2D.')+
       '<div class="inspector-card"><div class="card-heading">MODELO EXTERNO <span class="card-kicker">SKETCHFAB</span></div><div class="hardware-line"><span>Autor</span><strong>Moh1993</strong></div><div class="hardware-line"><span>Modelo</span><strong>R36S console</strong></div><a href="https://sketchfab.com/3d-models/r36s-console-c6ecbfabf473479a8ffd73149090c5bb" target="_blank" rel="noopener noreferrer" class="action-button secondary external-model-link">Abrir no Sketchfab ↗</a></div>'+
       '<div class="notification-box">O visualizador 3D é hospedado pelo Sketchfab e requer conexão com seus servidores. O modelo não pode ser distribuído como parte do repositório sem licença adequada.</div>';
+  } else if (state.tab === 'audit') {
+    renderAuditPanel(inspector, heading);
   } else if (state.tab === 'firmware') {
     renderFirmwarePanel(inspector, heading, showToast);
   } else if (state.tab === 'roms') {
@@ -87,20 +94,21 @@ function renderInspector() {
     $('backgroundInput').addEventListener('change', e => updateTheme({background:e.target.value}));
     $('fontScaleInput').addEventListener('input', e => updateTheme({fontScale:Number(e.target.value)}));
     $('scanlinesInput').addEventListener('change', e => updateTheme({scanlines:e.target.checked}));
-    $('exportThemeButton').addEventListener('click', () => {exportTheme(state.theme);showToast('Arquivo theme.xml exportado.');});
-    $('resetThemeButton').addEventListener('click', () => {state.theme={...DEFAULT_THEME};saveTheme();renderScreen();renderInspector();showToast('Aparência padrão restaurada.');});
+    $('exportThemeButton').addEventListener('click', () => {exportTheme(state.theme);auditAction('theme_exported',{section:'Theme Studio'});showToast('Arquivo theme.xml exportado.');});
+    $('resetThemeButton').addEventListener('click', () => {state.theme={...DEFAULT_THEME};saveTheme();renderScreen();renderInspector();auditAction('theme_reset',{section:'Theme Studio'});showToast('Aparência padrão restaurada.');});
   } else if (state.tab === 'library') {
     inspector.innerHTML = heading('Gerenciador de biblioteca','Carregue um arquivo gamelist.xml gerado pelo EmulationStation. Somente nomes são utilizados na prévia.') + `<div class="inspector-card"><div class="card-heading">IMPORTAR ARQUIVO <span class="card-kicker">LOCAL ONLY</span></div><div class="form-field"><label for="systemImport">Sistema de destino</label><select id="systemImport" class="field-select">${SYSTEMS.map((s,i) => `<option value="${s.id}" ${i===state.systemIndex?'selected':''}>${escapeHTML(s.name)}</option>`).join('')}</select></div><button type="button" class="action-button" id="importButton">Selecionar gamelist.xml</button><p class="fine-print">Limite: 2 MB e 2.000 jogos. Nenhum arquivo é enviado a servidores. Entradas importadas permanecem somente na sessão atual; use Exportar projeto para guardar uma cópia JSON.</p></div><div class="inspector-card"><div class="card-heading">SISTEMAS <span class="counter-pill">${Object.values(state.library).reduce((n,a)=>n+a.length,0)} JOGOS</span></div><div class="library-table">${SYSTEMS.map(s=>`<div class="library-row"><span>${escapeHTML(s.short)}</span><b>${(state.library[s.id]||[]).length}</b></div>`).join('')}</div></div><button type="button" class="action-button secondary" id="restoreLibraryButton">Restaurar biblioteca de exemplo</button>`;
     $('importButton').addEventListener('click', () => {$('gamelistFile').value='';$('gamelistFile').click();});
-    $('restoreLibraryButton').addEventListener('click',()=>{state.library=structuredClone(DEMO_GAMES);state.itemIndex=0;renderScreen();renderInspector();showToast('Biblioteca de demonstração restaurada.');});
+    $('restoreLibraryButton').addEventListener('click',()=>{state.library=structuredClone(DEMO_GAMES);state.itemIndex=0;renderScreen();renderInspector();auditAction('library_reset',{section:'Biblioteca'});showToast('Biblioteca de demonstração restaurada.');});
   } else {
-    inspector.innerHTML = heading('Ficha técnica','Valores de referência para modelos R36S com Rockchip RK3326. Clones podem apresentar componentes diferentes.') + `<div class="inspector-card"><div class="card-heading">ESPECIFICAÇÕES <span class="card-kicker">REFERENCE</span></div>${[['Processador','Rockchip RK3326 · 4× Cortex-A35'],['GPU','Mali-G31 MP2'],['Memória','1 GB DDR3L (modelo de referência)'],['Display','3,5” IPS · 640 × 480'],['Proporção','4:3'],['Armazenamento','Até 2 slots microSD, conforme revisão'],['Sistema','Linux · ArkOS / variantes']].map(([label,value])=>`<div class="hardware-line"><span>${label}</span><strong>${value}</strong></div>`).join('')}</div><div class="notification-box">Verifique o modelo da placa, a versão do firmware e os arquivos DTB antes de aplicar modificações ao R36S físico.</div><a class="action-button secondary" style="display:block;text-align:center;margin-top:20px" target="_blank" rel="noopener noreferrer" href="https://handhelds.wiki/R36S_Clones">Ver variantes conhecidas ↗</a>`;
+    inspector.innerHTML = heading('Ficha técnica','Valores de referência para modelos R36S com Rockchip RK3326. Clones podem apresentar componentes diferentes.') + `<div class="inspector-card"><div class="card-heading">ESPECIFICAÇÕES <span class="card-kicker">REFERENCE</span></div>${[['Processador',R36S_REFERENCE.cpu.soc + ' · '+ R36S_REFERENCE.cpu.cores+'× Cortex-A35'],['Clock (máximo)',R36S_REFERENCE.cpu.maxMHz+' MHz · frequência real variável'],['GPU',R36S_REFERENCE.gpu.name],['Memória física',R36S_REFERENCE.ram.installedMiB+' MiB DDR3L'],['Display',R36S_REFERENCE.display.diagonalInches+'” IPS · '+R36S_REFERENCE.display.width+' × '+R36S_REFERENCE.display.height],['Proporção',R36S_REFERENCE.display.aspect],['Armazenamento','2 slots microSD, conforme revisão'],['Gabinete (ref.)','130 × 83 × 35 mm · não calibrado'],['Sistema','Linux · ArkOS / variantes']].map(([label,value])=>`<div class="hardware-line"><span>${label}</span><strong>${value}</strong></div>`).join('')}</div><div class="notification-box">Perfil de referência, não medição do seu aparelho. RAM, CPU e GPU NÃO são limitados nem virtualizados pelo navegador. Para simular desempenho real é necessário criar e calibrar uma máquina virtual ARM/RK3326.</div><a class="action-button secondary" style="display:block;text-align:center;margin-top:20px" target="_blank" rel="noopener noreferrer" href="https://handhelds.wiki/R36S_Clones">Ver variantes conhecidas ↗</a>`;
   }
 }
 function updateTheme(patch) {
   state.theme=safeTheme({...state.theme,...patch});saveTheme();renderScreen();
   if ($('accentValue')) $('accentValue').textContent=state.theme.accent.toUpperCase();
   if ($('fontScaleValue')) $('fontScaleValue').textContent=state.theme.fontScale+'%';
+  scheduleThemeAudit();
 }
 function navigate(direction) {
   if (direction === 'left') {back();return;}
@@ -129,6 +137,7 @@ function setTab(tab) {
   if(!tabs[tab])return;
   const previousTab = state.tab;
   state.tab=tab;
+  if(tab==='viewer'&&previousTab!=='viewer')auditAction('model_opened',{section:'Modelo 3D'});
   $('consoleWrap').hidden=tab==='viewer'||tab==='roms';
   $('sketchfabStage').hidden=tab!=='viewer';
   $('romStage').hidden=tab!=='roms';
@@ -144,11 +153,11 @@ function setTab(tab) {
 // UI interaction
 for(const b of document.querySelectorAll('[data-tab]')) b.addEventListener('click',()=>setTab(b.dataset.tab));
 for(const b of document.querySelectorAll('[data-control]'))b.addEventListener('click',()=>act(b.dataset.control));
-$('backupButton').addEventListener('click',()=>{exportSnapshot(state.theme,state.library,selectedSystem().id);showToast('Projeto exportado em JSON.');});
+$('backupButton').addEventListener('click',()=>{exportSnapshot(state.theme,state.library,selectedSystem().id);auditAction('snapshot_exported',{section:'Projeto'});showToast('Projeto exportado em JSON.');});
 $('gamelistFile').addEventListener('change',async event=>{
   const file=event.target.files?.[0];if(!file)return;
   if(file.size>2_000_000){showToast('Arquivo acima do limite de 2 MB.');return;}
-  try {const names=textToGames(await file.text());const sys=$('systemImport').value;state.library[sys]=names;state.systemIndex=SYSTEMS.findIndex(s=>s.id===sys);state.itemIndex=0;state.view='games';renderScreen();renderInspector();showToast(`${names.length} jogos carregados na prévia.`);}catch(error){showToast(error.message || 'Falha ao abrir o arquivo.');}
+  try {const names=textToGames(await file.text());const sys=$('systemImport').value;state.library[sys]=names;state.systemIndex=SYSTEMS.findIndex(s=>s.id===sys);state.itemIndex=0;state.view='games';renderScreen();renderInspector();auditAction('gamelist_imported',{system:sys,count:names.length});showToast(`${names.length} jogos carregados na prévia.`);}catch(error){showToast(error.message || 'Falha ao abrir o arquivo.');}
 });
 document.addEventListener('keydown',event=>{
   const target=event.target;
