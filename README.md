@@ -1,5 +1,8 @@
 # R36S Web Lab
 
+**v0.9 — PokeForge R36S v1.6:** o ZIP Go/ARM original agora é reconhecido localmente pelo laboratório. Um adaptador de interface fiel à estrutura das telas do código permite visualizar o menu 640×480, escolher perfil, navegar HOME/BOXES/BANK/PARTY/TRAINER/EDITOR/TOOLS/POKEDEX e carregar o catálogo Pokédex local de 151 espécies diretamente do ZIP. A execução real dos binários ARM, o acesso a /dev/fb0, saves e demais serviços ArkOS ainda exigem um executor separado. **Os arquivos originais não são enviados ao repositório público.** [Instruções e limitações](docs/POKEFORGE_NATIVE_ZIP.md).
+
+
 **v0.8 — Importação de projetos:** importe os seus ZIPs de SLOT36S e PKForge R36S diretamente no laboratório privado, explore os arquivos e selecione a tela HTML principal. O editor HTML/CSS tem prévia 640×480 e há um modo experimental opt-in para JavaScript web em iframe de origem isolada. Adicionados controles físicos simulados L1/L2/R1/R2 (mouse, Q/E/Z/C e gamepad padrão 4–7). **Não é uma emulação ArkOS/RK3326 e não garante execução universal.** [Instruções, escopo e segurança](docs/IMPORT_AND_RUNTIME.md).
 
 
