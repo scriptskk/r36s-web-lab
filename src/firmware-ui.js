@@ -1,3 +1,4 @@
+import {auditAction} from "./audit.js";
 import {inspectFirmwareFile, formatSize} from "./firmware.js";
 import {escapeHTML} from "./model.js";
 
@@ -30,6 +31,7 @@ export function renderFirmwarePanel(inspector, heading, showToast) {
     try {
       lastReport=await inspectFirmwareFile(file);
       if(output.isConnected) output.innerHTML=reportMarkup(lastReport);
+      auditAction("firmware_inspected",{format:lastReport.type,size_bytes:file.size});
       showToast("Cabeçalho analisado; nenhum arquivo foi modificado.");
     } catch(error) {
       lastReport=null;
