@@ -3,7 +3,7 @@ import {exportTheme, exportSnapshot} from './export.js';
 import {renderFirmwarePanel} from './firmware-ui.js';
 import {renderBackupPanel} from './backup-ui.js';
 import {R36S_REFERENCE} from './hardware.js';
-import {renderProjectPanel,projectPreview,fitProjectFrame,navigateProject} from './project-lab-ui.js';
+import {renderProjectPanel,projectPreview,fitProjectFrame,navigateProject,isProjectRuntimeEnabled,stopProjectRuntime} from './project-lab-ui.js';
 import {PROJECTS} from './project-lab.js';
 import {auditAction,renderAuditPanel} from './audit.js';
 
@@ -161,7 +161,7 @@ function shoulder(control){
   // Hardware shoulders are input events, not a simulation of an RK3326 CPU.
   if(state.tab==='slot'||state.tab==='pkforge'){
     const mapped={l1:'left',r1:'right',l2:'back',r2:'confirm'};
-    if(!navigateProject(state.tab,mapped[control]))showToast('Este projeto ainda não tem um menu navegável.');
+    if(!navigateProject(state.tab,isProjectRuntimeEnabled(state.tab)?control:mapped[control]))showToast('Este projeto ainda não tem um menu navegável.');
     return;
   }
   if(control==='l1'||control==='r1'){
@@ -197,6 +197,7 @@ function setTab(tab) {
   if(!tabs[tab])return;
   if(tab==='projects'||tab==='slot'||tab==='pkforge')setProjectFolder(true);
   const previousTab = state.tab;
+  if(previousTab!==tab && (previousTab==='slot'||previousTab==='pkforge'))stopProjectRuntime();
   state.tab=tab;
   if(tab==='viewer'&&previousTab!=='viewer')auditAction('model_opened',{section:'Modelo 3D'});
   $('consoleWrap').hidden=tab==='viewer'||tab==='roms';
