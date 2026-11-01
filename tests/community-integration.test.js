@@ -19,9 +19,10 @@ test("Slot displays a recovered cartridge image and physical navigation entries"
   assert.ok((page.match(/data-lab-item/g)||[]).length>=2);
   assert.match(page,/GAME BOY ADVANCE/);
 });
-test("PKForge placeholder does not claim to contain unrecovered code",()=>{
+test("PokeForge landing page directs users to local ZIP adapter",()=>{
   const page=read("community/pkforge-r36s/preview.html");
-  assert.match(page,/arquivos originais/i);
+  assert.match(page,/Importe o pacote PokeForge v1\.6/);
+  assert.match(page,/IMPORTAR ZIP/);
   assert.ok((page.match(/data-lab-item/g)||[]).length>=2);
 });
 test("authenticated project sources are loaded into the R36S handheld menus",()=>{
