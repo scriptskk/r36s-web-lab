@@ -1,5 +1,7 @@
 # R36S Web Lab
 
+**Hospedagem gratuita e privada:** [Cloudflare Workers + Access + D1](docs/CLOUDFLARE_FREE.md). O deploy não foi ativado: necessita conectar sua conta Cloudflare, configurar D1, Access e segredos. O backend Flask/Render permanece como opção, mas não é necessário no caminho gratuito.
+
 Open-source tools for working with R36S user interfaces, inspecting local firmware headers and cataloguing extracted backup folders. Includes a separate private server with login and SQLite activity records.
 
 > The project does NOT boot ArkOS or emulate the Rockchip RK3326. Its reference profile does not limit physical CPU, RAM or GPU resources on the host machine.
